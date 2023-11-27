@@ -1,0 +1,16 @@
+---
+import { SEO } from 'astro-seo'
+const { title, seoTitle, seoDesc } = Astro.props
+---
+
+<head>
+	<SEO title={seoTitle} description={seoDesc} />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width" />
+	<meta name="generator" content={Astro.generator} />
+	<title>{title}</title>
+	<link rel="icon" type="image/x-icon" href="../../public/favicon.svg" sizes="any" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+</head>

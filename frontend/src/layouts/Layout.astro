@@ -1,51 +1,31 @@
 ---
-interface Props {
-	title: string;
-}
-
-const { title } = Astro.props;
+import MainHead from './MainHead.astro'
+const { title, seoDesc, seoTitle } = Astro.props
+import Nav from '../components/Nav.astro'
+import Footer from '../components/Footer.astro'
 ---
 
-<!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-	</head>
-	<body>
+	<MainHead title={title} seoTitle={seoTitle} seoDesc={seoDesc} />
+	<body
+		class="blob-container mx-auto flex max-w-[872px] flex-col gap-0 bg-neutral-900 px-10 py-8 text-sm text-white"
+	>
+		<Nav />
 		<slot />
+		<Footer />
+		<style>
+			@font-face {
+				font-family: 'San Francisco';
+				font-weight: 400;
+				src: url('https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-regular-webfont.woff');
+			}
+			*/ {
+				font-family: 'San Francisco', 'Helvetica Neue', 'Lucida Grande', sans-serif;
+			}
+			body {
+				background-color: #0d0f14;
+			}
+			
+		</style>
 	</body>
 </html>
-<style is:global>
-	:root {
-		--accent: 136, 58, 234;
-		--accent-light: 224, 204, 250;
-		--accent-dark: 49, 10, 101;
-		--accent-gradient: linear-gradient(
-			45deg,
-			rgb(var(--accent)),
-			rgb(var(--accent-light)) 30%,
-			white 60%
-		);
-	}
-	html {
-		font-family: system-ui, sans-serif;
-		background: #13151a;
-		background-size: 224px;
-	}
-	code {
-		font-family:
-			Menlo,
-			Monaco,
-			Lucida Console,
-			Liberation Mono,
-			DejaVu Sans Mono,
-			Bitstream Vera Sans Mono,
-			Courier New,
-			monospace;
-	}
-</style>

@@ -1,0 +1,50 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout
+	title="###"
+	seoTitle="###"
+	seoDesc="###"
+>
+<div class="bg-neutral-800 text-white p-4 rounded-md shadow-md mt-8">
+   <h1 class="text-2xl font-semibold">Chat de Messagerie</h1>
+ </div>
+
+ <!-- Zone de chat -->
+ <div class="flex-1 overflow-y-auto p-4">
+   <!-- Messages -->
+   <div class="flex flex-col space-y-4">
+     <div class="flex items-start">
+       <div class="bg-neutral-600 rounded-lg p-3">
+         <p>Salut, comment ça va ?</p>
+       </div>
+       <span class="ml-2 text-gray-400 text-sm">John Doe</span>
+       <span class="ml-2 text-gray-400 text-sm">11:50</span>
+     </div>
+
+     <div class="flex items-end justify-end">
+       <span class="mr-2 text-gray-400 text-sm">Jane Doe</span>
+       <span class="mr-2 text-gray-400 text-sm">11:52</span>
+       <div class="bg-teal-500 rounded-lg p-3">
+         <p>Tout va bien, merci !</p>
+       </div>
+     </div>
+
+     <!-- Ajoutez d'autres messages ici -->
+   </div>
+ </div>
+
+ <!-- Zone de saisie de message -->
+ <div class="bg-neutral-800
+  p-4 rounded-md shadow-md mb-12">
+   <div class="flex">
+     <input
+       type="text"
+       placeholder="Écrivez votre message..."
+       class="flex-1 p-2 border border-neutral-300 rounded-l-md bg-neutral-800"
+     />
+     <button class="bg-teal-500 text-white p-2 rounded-r-md">Envoyer</button>
+   </div>
+ </div>
+</div>
+</Layout>

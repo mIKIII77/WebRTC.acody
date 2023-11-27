@@ -1,8 +1,62 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Card from '../components/Card.astro';
 ---
+<Layout
+	title="###"
+	seoTitle="###"
+	seoDesc="###"
+>
 
-<body>
-  <h1 class="text-gray-900">My WebRTC App</h1>
-</body>
+<div class="flex flex-col h-screen bg-neutral-900 rounded-md mt-8">
+	<div class="flex-none bg-neutral-800 p-4 rounded-md shadow-md">
+	  <h1 class="text-gray-50 text-3xl">WebRTC App</h1>
+	</div>
+
+	<div class="flex flex-col flex-grow justify-center p-4 space-y-4">
+	  <div class="max-w-md bg-neutral-800 p-6 rounded-md shadow-md">
+		 <h2 class="text-2xl font-semibold mb-4">Call ID's</h2>
+		 <div class="overflow-y-auto max-h-40 ">
+			<ul class="divide-y divide-gray-300">
+			  <li class="py-2">Caller ID 1 <button class="bg-teal-500 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded shadow">
+				Appeler
+			 </button></li>
+			  <li class="py-2">Caller ID 2 <button class="bg-teal-500 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded shadow">
+				Appeler
+			 </button></li>
+			  <li class="py-2">Caller ID 3 <button class="bg-teal-500 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded shadow">
+				Appeler
+			 </button></li>
+			  <li class="py-2">Caller ID 4 <button class="bg-teal-500 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded shadow">
+				Appeler
+			 </button></li>
+			  <li class="py-2">Caller ID 5 <button class="bg-teal-500 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded shadow">
+				Appeler
+			 </button></li>
+			  <li class="py-2">Caller ID 6 <button class="bg-teal-500 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded shadow">
+				Appeler
+			 </button></li>
+			</ul>
+		 </div>
+	  </div>
+ 
+	  <div class="max-w-md bg-neutral-800 p-6 rounded-md shadow-md">
+		 Video stream
+	  </div>
+ 
+	  <div class=" bg-neutral-800 p-4 rounded-md shadow-md">
+		 <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+			Abandonner l'appel
+		 </button>
+		 <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+			Mute microphone
+		 </button>
+		 <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+			Mute camera
+		 </button>
+
+	  </div>
+	</div>
+ </div>
+ 
+ 
+</Layout>
