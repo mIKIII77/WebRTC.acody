@@ -12,60 +12,310 @@ import Layout from '../layouts/Layout.astro';
 	<div class="flex-none bg-neutral-800 p-4 rounded-md shadow-md flex flex-col">
 		<h1 class="text-2xl font-bold"> Entrer dans une salle de réunion </h1>
 		<div class="grid grid-rows-1 mt-2">
-		  <input id="room-input" name="room" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:border-teal-500 bg-neutral-700 col-span-6" placeholder="Numéro de votre salle de réunion" />
-		  <button id="connect-button" type="submit" class="font-semibold w-full bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none col-start-8">
+			<input id="room-input" name="room" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:border-teal-500 bg-neutral-700 col-span-6" placeholder="Numéro de votre salle de réunion" />
+			<button id="connect-button" type="submit" class="font-semibold w-full bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none col-start-8">
 			Rejoindre la salle de réunion
-		 </button>
+			</button>
 		</div>
-	 </div>
-	 
+	</div>
+	
+	<style type="text/css">
+		body, html {
+		  margin: 0;
+		  padding: 0;
+		  height: 100%;
+		  overflow: hidden;
+		}
+	
+		#video-chat-container {
+		  display: grid;
+		  grid-template-columns: 1fr 1fr; /* Deux colonnes /
+		  grid-template-rows: 1fr 1fr; / Deux rangées */
+		  gap: 10px;
+		  width: 100vw;
+		  height: 100vh;
+		  padding: 10px;
+		}
+	
+		video {
+		  width: 50%;
+		  height: 40%;
+		  object-fit: cover;
+		}
+	
+		#local-video {
+		  grid-row: 2;
+		  grid-column: 1;
+		}
+	
+		.remote-video:nth-child(2) {
+		  grid-row: 1;
+		  grid-column: 1;
+		}
+	
+		.remote-video:nth-child(3) {
+		  grid-row: 1;
+		  grid-column: 2;
+		}
+	
+		.remote-video:nth-child(4) {
+		  grid-row: 2;
+		  grid-column: 2;
+		}
+	  </style>
 
- 
+
 	<!-- Partie fixe pour la vidéo avec une hauteur personnalisée -->
 	<div class="relative flex-grow">
 		<div class="sticky top-0 bg-neutral-800 p-4 rounded-md shadow-md h-16 my-8 min-h-[300px] flex items-center justify-center">
 			<!-- Ajoutez ici le code pour l'animation avec l'icône du bonhomme -->
 			<div class="rounded-md p-4 max-w-sm w-full mx-auto">
 				<div class="animate-pulse">
-				  <h1 class="text-teal-300 opacity-50 text-xl text-center">En attente de la connexion à la réunion</h1>
+					<h1 class="text-teal-300 opacity-50 text-xl text-center">En attente de la connexion à la réunion</h1>
 				</div>
-				<div id="video-chat-container" class="video-position" style="display: none">
-					<!-- Les vidéos locales et distantes seront placées ici -->
-					<video id="local-video" autoplay muted></video>
-				 </div>
+				
 			</div>
+			<div id="room-selection-container" class="centered">
+				<h1>WebRTC video conference</h1>
+				<label>Enter the number of the room you want to connect</label>
+				<input id="room-input" type="text" />
+				<button id="connect-button">CONNECT</button>
+			  </div>
+			
+			  <div id="video-chat-container" class="video-position" style="display: none">
+				<!-- Les vidéos locales et distantes seront placées ici -->
+				<video id="local-video" autoplay muted></video>
+			  </div>
 
 
-		 </div>
-		 
- 
-	  <!-- Contenu principal -->
-	  <div class="bg-neutral-800 p-4 rounded-md flex justify-center items-center space-x-8">
+		</div>
+
+	<!-- Contenu principal -->
+	<div class="bg-neutral-800 p-4 rounded-md flex justify-center items-center space-x-8">
 		<button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow flex items-center">
-		  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
-			 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-		  </svg>
-		  Abandonner l'appel
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+			</svg>
+			Abandonner l'appel
 		</button>
 		<button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow flex items-center">
-		  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
-			 <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-		  </svg>
-		  Mute microphone
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+			</svg>
+			Mute microphone
 		</button>
 		<button class="bg-white hover-bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400	 rounded shadow flex items-center">
-		  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
-			 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 01-2.25-2.25V9m12.841 9.091L16.5 19.5m-1.409-1.409c.407-.407.659-.97.659-1.591v-9a2.25 2.25 0 00-2.25-2.25h-9c-.621 0-1.184.252-1.591.659m12.182 12.182L2.909 5.909M1.5 4.5l1.409 1.409" />
-		  </svg>
-		  Mute camera
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 01-2.25-2.25V9m12.841 9.091L16.5 19.5m-1.409-1.409c.407-.407.659-.97.659-1.591v-9a2.25 2.25 0 00-2.25-2.25h-9c-.621 0-1.184.252-1.591.659m12.182 12.182L2.909 5.909M1.5 4.5l1.409 1.409" />
+			</svg>
+			Mute camera
 		</button>
-	 </div>
-	 
 	</div>
- </div>
- 
- 
- <script src="/socket.io/socket.io.js" type="text/javascript" is:inline></script>
- <script src="scripts/client.js" type="text/javascript"></script>
+	</div>
+</div>
+
+<script src="/socket.io/socket.io.js" type="text/javascript" is:inline></script>
+<script type="text/javascript">
+	// DOM elements.
+const roomSelectionContainer = document.getElementById('room-selection-container');
+const roomInput = document.getElementById('room-input');
+const connectButton = document.getElementById('connect-button');
+const videoChatContainer = document.getElementById('video-chat-container');
+const localVideoComponent = document.getElementById('local-video');
+
+// Variables.
+const socket = io();
+const mediaConstraints = { audio: true, video: { width: 1280, height: 720 } };
+let localStream;
+let roomId;
+let peerConnections = {}; // Dictionary to hold all peer connections
+const iceServers = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+  ],
+};
+
+// BUTTON LISTENER
+connectButton.addEventListener('click', () => {
+  joinRoom(roomInput.value);
+});
+
+// SOCKET EVENT CALLBACKS
+socket.on('room_created', async () => {
+  console.log('Socket event callback: room_created');
+  await setLocalStream(mediaConstraints);
+});
+
+socket.on('room_joined', async () => {
+  console.log('Socket event callback: room_joined');
+  await setLocalStream(mediaConstraints);
+  socket.emit('start_call', roomId);
+});
+
+socket.on('full_room', () => {
+  console.log('Socket event callback: full_room');
+  alert('The room is full, please try another one');
+});
+
+socket.on('start_call', async () => {
+  console.log('Socket event callback: start_call');
+});
+
+socket.on('webrtc_offer', async (data) => {
+  console.log('Socket event callback: webrtc_offer');
+  await handleOffer(data);
+});
+
+socket.on('webrtc_answer', (data) => {
+  console.log('Socket event callback: webrtc_answer');
+  handleAnswer(data);
+});
+
+socket.on('webrtc_ice_candidate', (data) => {
+  console.log('Socket event callback: webrtc_ice_candidate');
+  handleNewICECandidateMsg(data);
+});
+
+socket.on('new_peer', (peerId) => {
+  console.log('Socket event callback: new_peer');
+  handleNewPeer(peerId);
+});
+
+// FUNCTIONS
+async function joinRoom(room) {
+  if (room === '') {
+    alert('Please type a room ID');
+  } else {
+    roomId = room;
+    socket.emit('join', room);
+    showVideoConference();
+    await setLocalStream(mediaConstraints).catch(error => {
+      console.error('Could not get user media', error);
+    });
+  }
+}
+
+function showVideoConference() {
+  roomSelectionContainer.style = 'display: none';
+  videoChatContainer.style = 'display: block';
+}
+
+async function setLocalStream(mediaConstraints) {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    console.log('Local stream obtained', stream); // Log pour déboguer
+    localStream = stream;
+    localVideoComponent.srcObject = stream;
+  } catch (error) {
+    console.error('Could not get user media', error);
+  }
+}
+
+async function handleNewPeer(peerId) {
+  if (!peerConnections[peerId]) {
+    await createPeerConnection(peerId);
+    if (localStream) {
+      localStream.getTracks().forEach(track => {
+        peerConnections[peerId].addTrack(track, localStream);
+      });
+    }
+    if (roomId) {
+      const offer = await peerConnections[peerId].createOffer();
+      await peerConnections[peerId].setLocalDescription(offer);
+      socket.emit('webrtc_offer', {
+        type: 'webrtc_offer',
+        sdp: offer,
+        roomId,
+        peerId,
+      });
+    }
+  }
+}
+
+async function createPeerConnection(peerId) {
+  const peerConnection = new RTCPeerConnection(iceServers);
+
+  peerConnection.ontrack = (event) => {
+    handleRemoteStreamAdded(event.streams[0], peerId);
+  };
+  peerConnection.onicecandidate = (event) => {
+    handleICECandidateEvent(event, peerId);
+  };
+
+  peerConnections[peerId] = peerConnection;
+  return peerConnection;
+}
+
+async function handleOffer(data) {
+  if (!peerConnections[data.peerId]) {
+    await createPeerConnection(data.peerId);
+  }
+  const peerConnection = peerConnections[data.peerId];
+  await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+  const answer = await peerConnection.createAnswer();
+  await peerConnection.setLocalDescription(answer);
+  socket.emit('webrtc_answer', {
+    type: 'webrtc_answer',
+    sdp: answer,
+    roomId,
+    peerId: data.peerId,
+  });
+}
+
+function handleAnswer(data) {
+  const peerConnection = peerConnections[data.peerId];
+  peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+}
+
+function handleICECandidateEvent(event, peerId) {
+  if (event.candidate) {
+    socket.emit('webrtc_ice_candidate', {
+      type: 'webrtc_ice_candidate',
+      candidate: event.candidate,
+      roomId,
+      peerId,
+    });
+  }
+}
+
+function handleNewICECandidateMsg(data) {
+  const peerConnection = peerConnections[data.peerId];
+  peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+}
+
+function addVideoStream(videoElement, stream, isLocal = false) {
+  console.log('Adding video stream', { videoElement, stream, isLocal }); // Log pour déboguer
+  videoElement.srcObject = stream;
+  videoElement.autoplay = true;
+  videoElement.playsInline = true;
+  videoElement.muted = isLocal; // La vidéo locale doit être en sourdine pour éviter les échos
+  if (isLocal) {
+    videoElement.id = 'local-video';
+    videoElement.style.backgroundColor = 'red'; // Pour le débogage
+  } else {
+    videoElement.classList.add('remote-video');
+    videoElement.style.backgroundColor = 'green'; // Pour le débogage
+  }
+  videoChatContainer.appendChild(videoElement);
+}
+
+function handleRemoteStreamAdded(stream, peerId) {
+  // Vérifiez si l'élément vidéo existe déjà pour ce peerId
+  let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+  if (!remoteVideoElement) {
+    remoteVideoElement = document.createElement('video');
+    remoteVideoElement.autoplay = true;
+    remoteVideoElement.playsInline = true;
+    remoteVideoElement.classList.add('remote-video');
+    remoteVideoElement.id = `remote-video-${peerId}`;
+    videoChatContainer.appendChild(remoteVideoElement);
+  }
+
+  remoteVideoElement.srcObject = stream;
+}
+</script>
 
 </Layout>

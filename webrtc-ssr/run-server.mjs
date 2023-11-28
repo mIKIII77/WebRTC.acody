@@ -8,6 +8,7 @@ const base = '/'; // Assurez-vous que cela correspond à l'option de base dans v
 
 // Serve the static files from the Astro build
 app.use(base, express.static('dist/client/'));
+app.use('/scripts', express.static('dist/scripts'));
 
 // Handle SSR for all get requests
 app.get('*', ssrHandler);
