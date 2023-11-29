@@ -25,6 +25,15 @@ connectButton.addEventListener('click', () => {
   joinRoom(roomInput.value);
 });
 
+const hangUpButton = document.getElementById('hangup-button');
+const toggleMicButton = document.getElementById('toggle-mic-button');
+const toggleCameraButton = document.getElementById('toggle-camera-button');
+
+hangUpButton.addEventListener('click', hangUpCall);
+toggleMicButton.addEventListener('click', toggleMicrophone);
+toggleCameraButton.addEventListener('click', toggleCamera);
+
+
 // SOCKET EVENT CALLBACKS
 socket.on('room_created', async () => {
   console.log('Socket event callback: room_created');
@@ -197,4 +206,32 @@ function handleRemoteStreamAdded(stream, peerId) {
   }
 
   remoteVideoElement.srcObject = stream;
+}
+
+function hangUpCall() {
+  for (let peerId in peerConnections) {
+    peerConnections[peerId].close();
+    delete peerConnections[peerId];
+  }
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
+  }
+
+  // Cacher la zone de vidéo conférence et montrer la sélection de salle
+  videoChatContainer.style.display = 'none';
+  roomSelectionContainer.style.display = 'block';
+}
+
+function toggleMicrophone() {
+  if (localStream) {
+    localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled;
+  }
+}
+
+function toggleCamera() {
+  if (localStream) {
+    localStream.getVideoTracks()[0].enabled = !localStream.getVideoTracks()[0].enabled;
+  }
 }
