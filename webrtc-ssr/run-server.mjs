@@ -21,6 +21,16 @@ const io = new SocketIOServer(server);
 io.on('connection', (socket) => {
   console.log('A user connected: ' + socket.id);
 
+  socket.on('chat_message', (data) => {
+    // Diffusion du message à tous les clients connectés
+    io.emit('chat_message', data);
+  });
+
+  // Les autres gestionnaires d'événements...
+  socket.on('disconnect', () => {
+    console.log('User disconnected: ' + socket.id);
+  });
+
   socket.on('join', (roomId) => {
     const selectedRoom = io.sockets.adapter.rooms.get(roomId);
     const numberOfClients = selectedRoom ? selectedRoom.size : 0;
