@@ -137,13 +137,17 @@ const mediaConstraints = { audio: true, video: { width: 1280, height: 720 } };
 let localStream;
 let roomId;
 let peerConnections = {}; // Dictionary to hold all peer connections
+
 const iceServers = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun3.l.google.com:19302' },
-  ],
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' }, // Serveur STUN existant
+        // Ajout de la configuration TURN
+        {
+            urls: 'turn:relay1.expressturn.com:3478', // URL du serveur TURN
+            username: 'efJJ0L80U0GANH5V0A', // Nom d'utilisateur
+            credential: 'LO5Tdr8aoKohTHDL' // Mot de passe
+        }
+    ]
 };
 
 // BUTTON LISTENER
@@ -159,6 +163,7 @@ hangUpButton.addEventListener('click', hangUpCall);
 toggleMicButton.addEventListener('click', toggleMicrophone);
 toggleCameraButton.addEventListener('click', toggleCamera);
 
+let isRoomCreator = false;
 
 // SOCKET EVENT CALLBACKS
 socket.on('room_created', async () => {
@@ -188,7 +193,16 @@ socket.on('start_call', async () => {
 
 socket.on('webrtc_offer', async (data) => {
   console.log('Socket event callback: webrtc_offer');
-  handleOffer(data);
+  
+  if (!localStream) {
+    console.log("Waiting to set local stream before handling offer");
+    await setLocalStream(mediaConstraints);
+  }
+  
+  if (!peerConnections[data.peerId]) {
+    await setupPeerConnection(data.peerId, false); // false = not an initiator
+  }
+  await handleOffer(data);
 });
 
 socket.on('webrtc_answer', (data) => {
@@ -201,10 +215,11 @@ socket.on('webrtc_ice_candidate', (data) => {
   handleIceCandidate(data);
 });
 
-socket.on('new_peer', (peerId) => {
+socket.on('new_peer', async (peerId) => {
   console.log('Socket event callback: new_peer');
-  createPeerConnection(peerId);
+  await createPeerConnection(peerId, false);
 });
+
 
 // FUNCTIONS
 async function joinRoom(room) {
@@ -214,6 +229,7 @@ async function joinRoom(room) {
     roomId = room;
     socket.emit('join', room);
     showVideoConference();
+    
     try {
       localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
       document.getElementById('local-video').srcObject = localStream;
@@ -222,6 +238,7 @@ async function joinRoom(room) {
     }
   }
 }
+
 function showVideoConference() {
   roomSelectionContainer.style = 'display: none';
   videoChatContainer.style = 'display: block';
@@ -235,17 +252,20 @@ function showVideoConference() {
 
 
 async function setLocalStream(mediaConstraints) {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-    console.log('Local stream obtained', stream);
-    const localVideoComponent = document.getElementById('local-video');
-    if (localVideoComponent) {
-      localVideoComponent.srcObject = stream;
-    } else {
-      console.error('The local video element was not found in the DOM.');
+  if (!localStream) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      console.log('Local stream obtained', stream);
+      localStream = stream;
+      const localVideoComponent = document.getElementById('local-video');
+      if (localVideoComponent) {
+        localVideoComponent.srcObject = stream;
+      } else {
+        console.error('The local video element was not found in the DOM.');
+      }
+    } catch (error) {
+      console.error('Could not get user media', error);
     }
-  } catch (error) {
-    console.error('Could not get user media', error);
   }
 }
 
@@ -265,28 +285,76 @@ async function handleNewPeer(peerId) {
   });
 }
 
+async function setupPeerConnection(peerId, isInitiator) {
+  const peerConnection = new RTCPeerConnection(iceServers);
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+  } else {
+    console.error("Local stream is not defined in setupPeerConnection");
+    return;
+  }
+
+  peerConnection.ontrack = (event) => addRemoteStream(event.streams[0], peerId);
+  peerConnection.onicecandidate = (event) => handleIceEvent(event, peerId);
+
+  peerConnections[peerId] = peerConnection;
+
+  if (isInitiator) {
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('webrtc_offer', { roomId, sdp: offer, peerId });
+  }
+}
+
+function addRemoteStream(event, peerId) {
+  const remoteVideoElement = document.getElementById(`remote-video-${peerId}`) || createRemoteVideoElement(peerId);
+  remoteVideoElement.srcObject = event.streams[0];
+}
+
+function createRemoteVideoElement(peerId) {
+  const remoteVideo = document.createElement('video');
+  remoteVideo.id = `remote-video-${peerId}`;
+  remoteVideo.autoplay = true;
+  remoteVideo.playsInline = true;
+  remoteVideo.classList.add('remote-video');
+  document.getElementById('remote-videos-container').appendChild(remoteVideo);
+  return remoteVideo;
+}
+
+async function handleIceEvent(event, peerId) {
+  if (event.candidate) {
+    socket.emit('webrtc_ice_candidate', {
+      roomId,
+      candidate: event.candidate,
+      peerId
+    });
+  }
+}
+
 async function createPeerConnection(peerId) {
   const peerConnection = new RTCPeerConnection(iceServers);
 
   // Ajouter les tracks locaux à la connexion peer
-  localStream.getTracks().forEach(track => {
-    peerConnection.addTrack(track, localStream);
-  });
+  localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+  // Gestion de l'ajout des streams distants
+  peerConnection.ontrack = (event) => addRemoteStream(event, peerId);
 
   // Gestion de l'ajout des streams distants
   peerConnection.ontrack = (event) => {
-    console.log(`Stream added from peer ${peerId}`);
-    let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
-    if (!remoteVideoElement) {
-      remoteVideoElement = document.createElement('video');
-      remoteVideoElement.id = `remote-video-${peerId}`;
-      remoteVideoElement.autoplay = true;
-      remoteVideoElement.playsInline = true;
-      remoteVideoElement.classList.add('remote-video');
-      document.getElementById('remote-videos-container').appendChild(remoteVideoElement);
-    }
-    remoteVideoElement.srcObject = event.streams[0];
-  };
+  let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+  if (!remoteVideoElement) {
+    remoteVideoElement = document.createElement('video');
+    remoteVideoElement.id = `remote-video-${peerId}`;
+    remoteVideoElement.autoplay = true;
+    remoteVideoElement.playsInline = true;
+    remoteVideoElement.classList.add('remote-video');
+    document.getElementById('remote-videos-container').appendChild(remoteVideoElement);
+  }
+  remoteVideoElement.srcObject = event.streams[0];
+};
+
 
   // Gestion des candidats ICE
   peerConnection.onicecandidate = (event) => {
@@ -318,36 +386,59 @@ async function createPeerConnection(peerId) {
 
 
 async function handleOffer(data) {
-  if (!peerConnections[data.peerId]) {
-    const peerConnection = await createPeerConnection(data.peerId);
+  try {
+    if (!peerConnections[data.peerId]) {
+      await createPeerConnection(data.peerId);
+    }
+
+    const peerConnection = peerConnections[data.peerId];
+    console.log(`État de la connexion Peer avant setRemoteDescription: ${peerConnection.signalingState}`);
+
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+    console.log(`Description distante définie pour le pair ${data.peerId}`);
+
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+
+    socket.emit('webrtc_answer', {
+      type: 'webrtc_answer',
+      sdp: answer,
+      roomId,
+      peerId: data.peerId,
+    });
+  } catch (error) {
+    console.error(`Erreur dans handleOffer pour le pair ${data.peerId}:`, error);
   }
-
-  const peerConnection = peerConnections[data.peerId];
-  await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-  
-  const answer = await peerConnection.createAnswer();
-  await peerConnection.setLocalDescription(answer);
-
-  socket.emit('webrtc_answer', {
-    type: 'webrtc_answer',
-    sdp: answer,
-    roomId,
-    peerId: data.peerId,
-  });
 }
 
-function handleAnswer(data) {
+async function handleAnswer(data) {
   const peerConnection = peerConnections[data.peerId];
-  peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+  console.log(`État de la connexion Peer avant setRemoteDescription: ${peerConnection.signalingState}`);
+
+  if (peerConnection.signalingState === 'have-remote-offer' || 
+      peerConnection.signalingState === 'have-local-pranswer') {
+    try {
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      console.log(`Description distante définie pour le pair ${data.peerId}`);
+    } catch (error) {
+      console.error(`Erreur dans handleAnswer pour le pair ${data.peerId}:`, error);
+    }
+  } else {
+    console.log("Connexion Peer n'est pas dans l'état approprié pour setRemoteDescription, état actuel:", peerConnection.signalingState);
+  }
 }
 
-function handleIceCandidate(data) {
+
+
+async function handleIceCandidate(data) {
   const peerConnection = peerConnections[data.peerId];
   if (peerConnection) {
     const iceCandidate = new RTCIceCandidate(data.candidate);
-    peerConnection.addIceCandidate(iceCandidate);
+    await peerConnection.addIceCandidate(iceCandidate);
   }
 }
+
+
 
 function handleNewICECandidateMsg(data) {
   const peerConnection = peerConnections[data.peerId];
@@ -456,8 +547,6 @@ function showVideoConference() {
     waitingText.style.display = 'none';
   }
 }
-
-
 
 </script>
 
