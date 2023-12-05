@@ -48,20 +48,24 @@ import Layout from '../layouts/Layout.astro';
 		  grid-column: 1;
 		}
 	
-		.remote-video:nth-child(2) {
+		.remote-video-1 {
 		  grid-row: 1;
 		  grid-column: 1;
 		}
 	
-		.remote-video:nth-child(3) {
+		.remote-video-2 {
 		  grid-row: 1;
 		  grid-column: 2;
 		}
 	
-		.remote-video:nth-child(4) {
+		.remote-video-3 {
 		  grid-row: 2;
 		  grid-column: 2;
 		}
+
+    .room-selection-container {
+      display: none;
+    }
 	  </style>
 
 
@@ -71,11 +75,11 @@ import Layout from '../layouts/Layout.astro';
 			<!-- Ajoutez ici le code pour l'animation avec l'icône du bonhomme -->
 			<div class="rounded-md p-4 max-w-sm w-full mx-auto">
 				<div class="animate-pulse">
-					<h1 class="text-teal-300 opacity-50 text-xl text-center">En attente de la connexion à la réunion</h1>
+					<h1 id="waitingText" class="text-teal-300 opacity-50 text-xl text-center">En attente de la connexion à la réunion</h1>
 				</div>
 
 			</div>
-			<div id="room-selection-container" class="centered">
+			<div id="room-selection-container" class="display: hidden">
 				<h1>WebRTC video conference</h1>
 				<label>Enter the number of the room you want to connect</label>
 				<input id="room-input" type="text" />
@@ -83,9 +87,14 @@ import Layout from '../layouts/Layout.astro';
 			  </div>
 			
 			  <div id="video-chat-container" class="video-position" style="display: none">
-				<!-- Les vidéos locales et distantes seront placées ici -->
-				<video id="local-video" autoplay muted></video>
-			  </div>
+				  <div id="local-video-container">
+            <video id="local-video" autoplay muted></video>
+          </div>
+        <div id="remote-videos-container">
+          <video id="remote-video-1"></video>
+          <video id="remote-video-2"></video>
+          <video id="remote-video-3"></video>
+        </div>
 		</div>
   </div>
 
@@ -155,13 +164,15 @@ toggleCameraButton.addEventListener('click', toggleCamera);
 socket.on('room_created', async () => {
   console.log('Socket event callback: room_created');
   await setLocalStream(mediaConstraints);
+  isRoomCreator = true;
 });
 
 socket.on('room_joined', async () => {
   console.log('Socket event callback: room_joined');
   await setLocalStream(mediaConstraints);
+  isRoomCreator = false;
   socket.emit('start_call', roomId);
-});
+}); 
 
 socket.on('full_room', () => {
   console.log('Socket event callback: full_room');
@@ -170,11 +181,14 @@ socket.on('full_room', () => {
 
 socket.on('start_call', async () => {
   console.log('Socket event callback: start_call');
+  if (isRoomCreator) {
+    createPeerConnections();
+  }
 });
 
 socket.on('webrtc_offer', async (data) => {
   console.log('Socket event callback: webrtc_offer');
-  await handleOffer(data);
+  handleOffer(data);
 });
 
 socket.on('webrtc_answer', (data) => {
@@ -184,12 +198,12 @@ socket.on('webrtc_answer', (data) => {
 
 socket.on('webrtc_ice_candidate', (data) => {
   console.log('Socket event callback: webrtc_ice_candidate');
-  handleNewICECandidateMsg(data);
+  handleIceCandidate(data);
 });
 
 socket.on('new_peer', (peerId) => {
   console.log('Socket event callback: new_peer');
-  handleNewPeer(peerId);
+  createPeerConnection(peerId);
 });
 
 // FUNCTIONS
@@ -200,71 +214,120 @@ async function joinRoom(room) {
     roomId = room;
     socket.emit('join', room);
     showVideoConference();
-    await setLocalStream(mediaConstraints).catch(error => {
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      document.getElementById('local-video').srcObject = localStream;
+    } catch (error) {
       console.error('Could not get user media', error);
-    });
+    }
   }
 }
-
 function showVideoConference() {
   roomSelectionContainer.style = 'display: none';
   videoChatContainer.style = 'display: block';
+
+  // Masquer le texte d'attente
+  const waitingText = document.getElementById('waitingText');
+  if (waitingText) {
+    waitingText.style.display = 'none';
+  }
 }
+
 
 async function setLocalStream(mediaConstraints) {
   try {
     const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-    console.log('Local stream obtained', stream); // Log pour déboguer
-    localStream = stream;
-    localVideoComponent.srcObject = stream;
+    console.log('Local stream obtained', stream);
+    const localVideoComponent = document.getElementById('local-video');
+    if (localVideoComponent) {
+      localVideoComponent.srcObject = stream;
+    } else {
+      console.error('The local video element was not found in the DOM.');
+    }
   } catch (error) {
     console.error('Could not get user media', error);
   }
 }
 
 async function handleNewPeer(peerId) {
-  if (!peerConnections[peerId]) {
-    await createPeerConnection(peerId);
-    if (localStream) {
-      localStream.getTracks().forEach(track => {
-        peerConnections[peerId].addTrack(track, localStream);
-      });
-    }
-    if (roomId) {
-      const offer = await peerConnections[peerId].createOffer();
-      await peerConnections[peerId].setLocalDescription(offer);
-      socket.emit('webrtc_offer', {
-        type: 'webrtc_offer',
-        sdp: offer,
-        roomId,
-        peerId,
-      });
-    }
-  }
+  const peerConnection = await createPeerConnection(peerId);
+  localStream.getTracks().forEach(track => {
+    peerConnection.addTrack(track, localStream);
+  });
+
+  const offer = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(offer);
+  socket.emit('webrtc_offer', {
+    type: 'webrtc_offer',
+    sdp: offer,
+    roomId,
+    peerId,
+  });
 }
 
 async function createPeerConnection(peerId) {
   const peerConnection = new RTCPeerConnection(iceServers);
 
+  // Ajouter les tracks locaux à la connexion peer
+  localStream.getTracks().forEach(track => {
+    peerConnection.addTrack(track, localStream);
+  });
+
+  // Gestion de l'ajout des streams distants
   peerConnection.ontrack = (event) => {
-    handleRemoteStreamAdded(event.streams[0], peerId);
+    console.log(`Stream added from peer ${peerId}`);
+    let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+    if (!remoteVideoElement) {
+      remoteVideoElement = document.createElement('video');
+      remoteVideoElement.id = `remote-video-${peerId}`;
+      remoteVideoElement.autoplay = true;
+      remoteVideoElement.playsInline = true;
+      remoteVideoElement.classList.add('remote-video');
+      document.getElementById('remote-videos-container').appendChild(remoteVideoElement);
+    }
+    remoteVideoElement.srcObject = event.streams[0];
   };
+
+  // Gestion des candidats ICE
   peerConnection.onicecandidate = (event) => {
-    handleICECandidateEvent(event, peerId);
+    if (event.candidate) {
+      console.log(`Sending ICE candidate to peer ${peerId}`, event.candidate);
+      socket.emit('webrtc_ice_candidate', {
+        type: 'webrtc_ice_candidate',
+        candidate: event.candidate,
+        roomId,
+        peerId,
+      });
+    }
   };
 
   peerConnections[peerId] = peerConnection;
-  return peerConnection;
+
+  // Créer une offre si c'est l'utilisateur qui a rejoint la salle en second
+  if (!isRoomCreator) {
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('webrtc_offer', {
+      type: 'webrtc_offer',
+      sdp: offer,
+      roomId,
+      peerId,
+    });
+  }
 }
+
 
 async function handleOffer(data) {
   if (!peerConnections[data.peerId]) {
-    await createPeerConnection(data.peerId);
+    const peerConnection = await createPeerConnection(data.peerId);
   }
+
   const peerConnection = peerConnections[data.peerId];
   await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+  
   const answer = await peerConnection.createAnswer();
   await peerConnection.setLocalDescription(answer);
+
   socket.emit('webrtc_answer', {
     type: 'webrtc_answer',
     sdp: answer,
@@ -278,20 +341,25 @@ function handleAnswer(data) {
   peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
 }
 
-function handleICECandidateEvent(event, peerId) {
-  if (event.candidate) {
-    socket.emit('webrtc_ice_candidate', {
-      type: 'webrtc_ice_candidate',
-      candidate: event.candidate,
-      roomId,
-      peerId,
-    });
+function handleIceCandidate(data) {
+  const peerConnection = peerConnections[data.peerId];
+  if (peerConnection) {
+    const iceCandidate = new RTCIceCandidate(data.candidate);
+    peerConnection.addIceCandidate(iceCandidate);
   }
 }
 
 function handleNewICECandidateMsg(data) {
   const peerConnection = peerConnections[data.peerId];
   peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+}
+
+function sendIceCandidate(candidate, peerId) {
+  socket.emit('webrtc_ice_candidate', {
+    roomId,
+    candidate,
+    peerId,
+  });
 }
 
 function addVideoStream(videoElement, stream, isLocal = false) {
@@ -311,19 +379,28 @@ function addVideoStream(videoElement, stream, isLocal = false) {
 }
 
 function handleRemoteStreamAdded(stream, peerId) {
-  // Vérifiez si l'élément vidéo existe déjà pour ce peerId
-  let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+  console.log(`handleRemoteStreamAdded called with peerId: ${peerId}`);
+  // L'ID de l'élément vidéo doit correspondre à celui utilisé lors de la création de l'élément
+  let videoElementId = `remote-video-${peerId}`;
+  let remoteVideoElement = document.getElementById(videoElementId);
+  
   if (!remoteVideoElement) {
+    console.log(`Creating new video element for peer ${peerId}`);
     remoteVideoElement = document.createElement('video');
+    remoteVideoElement.id = videoElementId;
     remoteVideoElement.autoplay = true;
     remoteVideoElement.playsInline = true;
     remoteVideoElement.classList.add('remote-video');
-    remoteVideoElement.id = `remote-video-${peerId}`;
-    videoChatContainer.appendChild(remoteVideoElement);
+    // Ajoutez l'élément vidéo au conteneur des vidéos distantes
+    document.getElementById('remote-videos-container').appendChild(remoteVideoElement);
+  }
+  else {
+    console.log(`Replacing video element for peer ${peerId}`);
   }
 
   remoteVideoElement.srcObject = stream;
 }
+
 
 function hangUpCall() {
   console.log("Hang Up Call");
@@ -337,10 +414,25 @@ function hangUpCall() {
     localStream = null;
   }
 
-  // Cacher la zone de vidéo conférence et montrer la sélection de salle
+  // Nettoyer les vidéos distantes
+  let remoteVideosContainer = document.getElementById('remote-videos-container');
+  while (remoteVideosContainer.firstChild) {
+    remoteVideosContainer.removeChild(remoteVideosContainer.firstChild);
+  }
+
+  // Réafficher le texte d'attente
+  const waitingText = document.getElementById('waitingText');
+  if (waitingText) {
+    waitingText.style.display = 'block';
+  }
+
+  // Masquer la zone de vidéo conférence
   videoChatContainer.style.display = 'none';
-  roomSelectionContainer.style.display = 'block';
+
+  // Masquer le conteneur de sélection de salle (roomSelectionContainer)
+  roomSelectionContainer.style.display = 'none';
 }
+
 
 function toggleMicrophone() {
   console.log("Before toggling, microphone enabled:", localStream.getAudioTracks()[0].enabled);
@@ -353,6 +445,18 @@ function toggleCamera() {
   localStream.getVideoTracks()[0].enabled = !localStream.getVideoTracks()[0].enabled;
   console.log("After toggling, camera enabled:", localStream.getVideoTracks()[0].enabled);
 }
+
+function showVideoConference() {
+  roomSelectionContainer.style = 'display: none';
+  videoChatContainer.style = 'display: block';
+
+  // Masquer le texte d'attente
+  const waitingText = document.getElementById('waitingText');
+  if (waitingText) {
+    waitingText.style.display = 'none';
+  }
+}
+
 
 
 </script>

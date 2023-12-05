@@ -19,12 +19,13 @@ const io = new SocketIOServer(server);
 
 // Socket.io event handling
 io.on('connection', (socket) => {
-  console.log('A user connected');
+  console.log('A user connected: ' + socket.id);
 
   socket.on('join', (roomId) => {
     const selectedRoom = io.sockets.adapter.rooms.get(roomId);
     const numberOfClients = selectedRoom ? selectedRoom.size : 0;
 
+    console.log(`Client ${socket.id} requesting to join room ${roomId}`);
     if (numberOfClients < 4) {
       console.log(`Joining room ${roomId} and emitting room_joined socket event`);
       socket.join(roomId);
@@ -41,6 +42,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('webrtc_offer', (data) => {
+    console.log(`Received offer from ${socket.id} in room ${data.roomId}`);
     socket.to(data.peerId).emit('webrtc_offer', {
       peerId: socket.id, 
       sdp: data.sdp
@@ -48,6 +50,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('webrtc_answer', (data) => {
+    console.log(`Received answer from ${socket.id} in room ${data.roomId}`);
     socket.to(data.peerId).emit('webrtc_answer', {
       peerId: socket.id, 
       sdp: data.sdp
@@ -55,6 +58,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('webrtc_ice_candidate', (data) => {
+    console.log(`Received ICE candidate from ${socket.id} for room ${data.roomId}`);
     socket.to(data.peerId).emit('webrtc_ice_candidate', {
       peerId: socket.id,
       label: data.label,
@@ -64,7 +68,7 @@ io.on('connection', (socket) => {
 
   // Handle user disconnect
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    console.log('User disconnected: ' + socket.id);
   });
 });
 
