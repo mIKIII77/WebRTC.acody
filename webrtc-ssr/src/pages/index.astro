@@ -308,8 +308,39 @@ async function setupPeerConnection(peerId, isInitiator) {
 }
 
 function addRemoteStream(event, peerId) {
-  const remoteVideoElement = document.getElementById(`remote-video-${peerId}`) || createRemoteVideoElement(peerId);
-  remoteVideoElement.srcObject = event.streams[0];
+  let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+  if (!remoteVideoElement) {
+    remoteVideoElement = createRemoteVideoElement(peerId);
+  }
+
+  // Check if streams array is available and has at least one stream
+  let stream;
+  if (event.streams && event.streams.length > 0) {
+    stream = event.streams[0];
+    console.log(`Stream found in event for peer ${peerId}`, stream);
+  } else {
+    // If no stream is associated with the track, create a new stream
+    stream = new MediaStream();
+    console.log(`No stream in event, creating new stream for peer ${peerId}`);
+    // Check if event.track is defined
+    if (event.track) {
+      console.log(`Track found in event for peer ${peerId}`, event.track);
+      stream.addTrack(event.track);
+    } else {
+      console.error(`No track found in event for peer ${peerId}`);
+    }
+  }
+
+  // Detailed logging
+  console.log(`Adding remote stream for peer ${peerId}`, stream);
+  console.log(`Stream active: ${stream.active}, Tracks: ${stream.getTracks().length}`);
+  stream.getTracks().forEach(track => console.log(`Track kind: ${track.kind}, Track enabled: ${track.enabled}`));
+
+  if (stream.getTracks().length === 0) {
+    console.error('No tracks in the remote stream');
+  } else {
+    remoteVideoElement.srcObject = stream;
+  }
 }
 
 function createRemoteVideoElement(peerId) {
@@ -397,6 +428,14 @@ async function handleOffer(data) {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
     console.log(`Description distante définie pour le pair ${data.peerId}`);
 
+    // Process cached ICE candidates
+    if (peerConnection.cachedIceCandidates) {
+      peerConnection.cachedIceCandidates.forEach(cachedCandidate => {
+        peerConnection.addIceCandidate(new RTCIceCandidate(cachedCandidate));
+      });
+      peerConnection.cachedIceCandidates = [];
+    }
+
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
 
@@ -413,28 +452,34 @@ async function handleOffer(data) {
 
 async function handleAnswer(data) {
   const peerConnection = peerConnections[data.peerId];
-  console.log(`État de la connexion Peer avant setRemoteDescription: ${peerConnection.signalingState}`);
+  console.log(`Peer connection state before setting remote description: ${peerConnection.signalingState}`);
 
-  if (peerConnection.signalingState === 'have-remote-offer' || 
-      peerConnection.signalingState === 'have-local-pranswer') {
+  if (peerConnection.signalingState === 'have-local-offer') {
     try {
       await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-      console.log(`Description distante définie pour le pair ${data.peerId}`);
+      console.log(`Remote description set for peer ${data.peerId}`);
     } catch (error) {
-      console.error(`Erreur dans handleAnswer pour le pair ${data.peerId}:`, error);
+      console.error(`Error in handleAnswer for peer ${data.peerId}:`, error);
     }
   } else {
-    console.log("Connexion Peer n'est pas dans l'état approprié pour setRemoteDescription, état actuel:", peerConnection.signalingState);
+    console.log(`Peer connection not in the correct state to set remote description, current state: ${peerConnection.signalingState}`);
   }
 }
-
 
 
 async function handleIceCandidate(data) {
   const peerConnection = peerConnections[data.peerId];
   if (peerConnection) {
-    const iceCandidate = new RTCIceCandidate(data.candidate);
-    await peerConnection.addIceCandidate(iceCandidate);
+    if (!peerConnection.remoteDescription) {
+      console.log("Queueing ICE candidate as remote description is not yet set");
+      if (!peerConnection.cachedIceCandidates) {
+        peerConnection.cachedIceCandidates = [];
+      }
+      peerConnection.cachedIceCandidates.push(data.candidate);
+    } else {
+      console.log("Adding ICE candidate");
+      await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    }
   }
 }
 
