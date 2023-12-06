@@ -289,12 +289,9 @@ async function setupPeerConnection(peerId, isInitiator) {
   const peerConnection = new RTCPeerConnection(iceServers);
 
   if (localStream) {
-    localStream.getTracks().forEach(track => {
-      console.log(`Adding local track to peer connection for peer ${peerId}`);
-      peerConnection.addTrack(track, localStream);
-    });
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
   } else {
-    console.error("Local stream is not defined in setupPeerConnection for peer", peerId);
+    console.error("Local stream is not defined in setupPeerConnection");
     return;
   }
 
@@ -311,39 +308,32 @@ async function setupPeerConnection(peerId, isInitiator) {
 }
 
 function addRemoteStream(event, peerId) {
-  let remoteVideoElement = document.getElementById(`remote-video-${peerId}`) || createRemoteVideoElement(peerId);
+  let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
   if (!remoteVideoElement) {
     remoteVideoElement = createRemoteVideoElement(peerId);
   }
 
-  // Check if streams array is available and has at least one stream
   let stream;
   if (event.streams && event.streams.length > 0) {
-    console.log(`Adding remote stream for peer ${peerId}`, event.streams[0]);
-    remoteVideoElement.srcObject = event.streams[0];
+    // Use the stream from the event if it exists
+    stream = event.streams[0];
   } else {
-    // If no stream is associated with the track, create a new stream
+    // Create a new stream and add the track to it
     stream = new MediaStream();
-    console.log(`No stream in event, creating new stream for peer ${peerId}`);
-    // Check if event.track is defined
     if (event.track) {
-      console.log(`Track found in event for peer ${peerId}`, event.track);
       stream.addTrack(event.track);
-    } else {
-      console.error(`No track found in event for peer ${peerId}`);
     }
   }
 
-  // Detailed logging
+  // Additional logging to debug
   console.log(`Adding remote stream for peer ${peerId}`, stream);
-  console.log(`Stream active: ${stream.active}, Tracks: ${stream.getTracks().length}`);
-  stream.getTracks().forEach(track => console.log(`Track kind: ${track.kind}, Track enabled: ${track.enabled}`));
-
   if (stream.getTracks().length === 0) {
     console.error('No tracks in the remote stream');
-  } else {
-    remoteVideoElement.srcObject = stream;
   }
+
+  remoteVideoElement.srcObject = stream;
+  remoteVideoElement.muted = false; // Ensure remote video is not muted
+  remoteVideoElement.volume = 1; // Ensure volume is set to maximum
 }
 
 function createRemoteVideoElement(peerId) {
@@ -351,10 +341,12 @@ function createRemoteVideoElement(peerId) {
   remoteVideo.id = `remote-video-${peerId}`;
   remoteVideo.autoplay = true;
   remoteVideo.playsInline = true;
-  remoteVideo.classList.add('remote-video');
+  remoteVideo.classList.add('remote-video', ...tailwindClasses);
+
   document.getElementById('remote-videos-container').appendChild(remoteVideo);
   return remoteVideo;
 }
+
 
 async function handleIceEvent(event, peerId) {
   if (event.candidate) {
@@ -369,27 +361,28 @@ async function handleIceEvent(event, peerId) {
 async function createPeerConnection(peerId) {
   const peerConnection = new RTCPeerConnection(iceServers);
 
-  localStream.getTracks().forEach(track => {
-    console.log(`Adding local track to peer connection for peer ${peerId}`);
-    peerConnection.addTrack(track, localStream);
-  });
+  // Ajouter les tracks locaux à la connexion peer
+  localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
+  // Gestion de l'ajout des streams distants
+  peerConnection.ontrack = (event) => addRemoteStream(event, peerId);
+
+  // Gestion de l'ajout des streams distants
   peerConnection.ontrack = (event) => {
-    console.log(`ontrack event triggered for peer ${peerId}`, event);
-    let remoteVideoElement = document.getElementById(`remote-video-${peerId}`) || createRemoteVideoElement(peerId);
-    if (event.streams && event.streams[0]) {
-      console.log(`Stream found in ontrack event for peer ${peerId}`, event.streams[0]);
-      remoteVideoElement.srcObject = event.streams[0];
-    } else if (event.track) {
-      let newStream = new MediaStream([event.track]);
-      console.log(`New stream created for peer ${peerId} with track`, event.track);
-      remoteVideoElement.srcObject = newStream;
-    } else {
-      console.error(`No stream or track found in ontrack event for peer ${peerId}`);
-    }
-  };
+  let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+  if (!remoteVideoElement) {
+    remoteVideoElement = document.createElement('video');
+    remoteVideoElement.id = `remote-video-${peerId}`;
+    remoteVideoElement.autoplay = true;
+    remoteVideoElement.playsInline = true;
+    remoteVideoElement.classList.add('remote-video');
+    document.getElementById('remote-videos-container').appendChild(remoteVideoElement);
+  }
+  remoteVideoElement.srcObject = event.streams[0];
+};
 
-  // Handle ICE candidates
+
+  // Gestion des candidats ICE
   peerConnection.onicecandidate = (event) => {
     if (event.candidate) {
       console.log(`Sending ICE candidate to peer ${peerId}`, event.candidate);
@@ -417,73 +410,73 @@ async function createPeerConnection(peerId) {
   }
 }
 
+
 async function handleOffer(data) {
   try {
-    const peerConnection = peerConnections[data.peerId] || await createPeerConnection(data.peerId);
-    console.log(`Setting remote description for peer ${data.peerId}`);
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+    if (!peerConnections[data.peerId]) {
+      await createPeerConnection(data.peerId);
+    }
 
-    // Process any queued ICE candidates
+    const peerConnection = peerConnections[data.peerId];
+    console.log(`État de la connexion Peer avant setRemoteDescription: ${peerConnection.signalingState}`);
+
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+    console.log(`Description distante définie pour le pair ${data.peerId}`);
+
+    // Process cached ICE candidates
     if (peerConnection.cachedIceCandidates) {
-      console.log(`Adding cached ICE candidates for peer ${data.peerId}`);
-      peerConnection.cachedIceCandidates.forEach(async (candidate) => {
-        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      peerConnection.cachedIceCandidates.forEach(cachedCandidate => {
+        peerConnection.addIceCandidate(new RTCIceCandidate(cachedCandidate));
       });
       peerConnection.cachedIceCandidates = [];
     }
 
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
-    socket.emit('webrtc_answer', { type: 'webrtc_answer', sdp: answer, roomId, peerId: data.peerId });
+
+    socket.emit('webrtc_answer', {
+      type: 'webrtc_answer',
+      sdp: answer,
+      roomId,
+      peerId: data.peerId,
+    });
   } catch (error) {
-    console.error(`Error handling offer for peer ${data.peerId}:`, error);
+    console.error(`Erreur dans handleOffer pour le pair ${data.peerId}:`, error);
   }
 }
-
 
 async function handleAnswer(data) {
-  try {
-    const peerConnection = peerConnections[data.peerId];
-    if (peerConnection && peerConnection.signalingState === 'have-local-offer') {
-      console.log(`Setting remote description for peer ${data.peerId}`);
-      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+  const peerConnection = peerConnections[data.peerId];
+  console.log(`Peer connection state before setting remote description: ${peerConnection.signalingState}`);
 
-      // Process any queued ICE candidates
-      if (peerConnection.cachedIceCandidates) {
-        console.log(`Adding cached ICE candidates for peer ${data.peerId}`);
-        peerConnection.cachedIceCandidates.forEach(async (candidate) => {
-          await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-        });
-        peerConnection.cachedIceCandidates = [];
-      }
-    } else {
-      console.error(`Peer connection in wrong state for peer ${data.peerId}: ${peerConnection ? peerConnection.signalingState : 'not found'}`);
+  if (peerConnection.signalingState === 'have-local-offer') {
+    try {
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      console.log(`Remote description set for peer ${data.peerId}`);
+    } catch (error) {
+      console.error(`Error in handleAnswer for peer ${data.peerId}:`, error);
     }
-  } catch (error) {
-    console.error(`Error handling answer for peer ${data.peerId}:`, error);
+  } else {
+    console.log(`Peer connection not in the correct state to set remote description, current state: ${peerConnection.signalingState}`);
   }
 }
-
 
 
 async function handleIceCandidate(data) {
   const peerConnection = peerConnections[data.peerId];
   if (peerConnection) {
     if (!peerConnection.remoteDescription) {
-      console.log(`Queueing ICE candidate for peer ${data.peerId}`);
+      console.log("Queueing ICE candidate as remote description is not yet set");
       if (!peerConnection.cachedIceCandidates) {
         peerConnection.cachedIceCandidates = [];
       }
       peerConnection.cachedIceCandidates.push(data.candidate);
     } else {
-      console.log(`Adding ICE candidate for peer ${data.peerId}`);
+      console.log("Adding ICE candidate");
       await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
     }
-  } else {
-    console.error(`No peer connection found for peer ${data.peerId}`);
   }
 }
-
 
 
 
@@ -540,6 +533,7 @@ function handleRemoteStreamAdded(stream, peerId) {
 }
 
 
+
 function hangUpCall() {
   console.log("Hang Up Call");
   for (let peerId in peerConnections) {
@@ -573,15 +567,36 @@ function hangUpCall() {
 
 
 function toggleMicrophone() {
-  console.log("Before toggling, microphone enabled:", localStream.getAudioTracks()[0].enabled);
-  localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled;
-  console.log("After toggling, microphone enabled:", localStream.getAudioTracks()[0].enabled);
+  const audioTrack = localStream.getAudioTracks()[0];
+  if (audioTrack) {
+    audioTrack.enabled = !audioTrack.enabled;
+    console.log("Microphone toggled. Now enabled:", audioTrack.enabled);
+
+    // Update the track on all peer connections
+    for (let peerId in peerConnections) {
+      const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === audioTrack.kind);
+      if (sender) {
+        sender.replaceTrack(audioTrack);
+      }
+    }
+  }
 }
 
+
 function toggleCamera() {
-  console.log("Before toggling, camera enabled:", localStream.getVideoTracks()[0].enabled);
-  localStream.getVideoTracks()[0].enabled = !localStream.getVideoTracks()[0].enabled;
-  console.log("After toggling, camera enabled:", localStream.getVideoTracks()[0].enabled);
+  const videoTrack = localStream.getVideoTracks()[0];
+  if (videoTrack) {
+    videoTrack.enabled = !videoTrack.enabled;
+    console.log("Camera toggled. Now enabled:", videoTrack.enabled);
+
+    // Update the track on all peer connections
+    for (let peerId in peerConnections) {
+      const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === videoTrack.kind);
+      if (sender) {
+        sender.replaceTrack(videoTrack);
+      }
+    }
+  }
 }
 
 function showVideoConference() {
