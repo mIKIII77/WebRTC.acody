@@ -1,0 +1,936 @@
+\documentclass[12pt, a4paper, oneside]{Thesis}
+\usepackage[utf8]{inputenc}
+\usepackage{kpfonts}
+\usepackage[T1]{fontenc}
+\usepackage[francais]{babel}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{datetime}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{pgf-umlsd}
+\usepackage{pdflscape}
+\usepackage{hyperref}
+
+\usepackage{geometry}
+\geometry{hmargin=2.5cm,vmargin=1.5cm}
+
+\newdateformat{mydate}{\THEDAY\space\monthname[\THEMONTH]\space\THEYEAR}
+
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  commentstyle=\color{gray},
+  keywordstyle=\color{blue},
+  stringstyle=\color{purple},
+  numbers=left,
+  numbersep=5pt,
+  frame=single,
+  rulecolor=\color{black},
+  tabsize=2,
+  captionpos=b,
+  breaklines=true,
+  breakatwhitespace=true,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  morecomment=[l]{\#}
+}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\renewcommand{\lstlistingname}{}
+\renewcommand{\thesection}{\arabic{section}}
+
+\usepackage{fancyhdr}
+\usepackage{lastpage} % Ajouter pour le référencement de la dernière page
+
+\fancypagestyle{plain}{
+  \fancyhf{} % clear all header and footer fields for the first page
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyhead{} % efface le contenu du haut de page
+\fancyfoot[L]{Rapport SAE5.ROM.03} % Gauche du pied de page
+\fancyfoot[C]{\thepage/\pageref{LastPage}} % Numéro de page / Total de pages au centre du pied de page
+\fancyfoot[R]{PLUVIOSE - KARAPETYAN} % Droite du pied de page
+\renewcommand{\headrulewidth}{0pt} % Pas de ligne en haut de page
+\renewcommand{\footrulewidth}{0pt} % Pas de ligne en bas de page
+
+\newcommand{\newthreadShift}[4][gray!30]{
+  \newinst[#4]{#2}{#3}
+  \stepcounter{threadnum}
+  \node[below of=inst\theinstnum,node distance=0.8cm] (thread\thethreadnum) {};
+  \tikzstyle{threadcolor\thethreadnum}=[fill=#1]
+  \tikzstyle{instcolor#2}=[fill=#1]
+}
+
+\usepackage{titlesec}
+
+% Aligner les titres à gauche
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+% Justifier le texte des titres si nécessaire
+\titlespacing*{\section}
+  {0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+\titlespacing*{\subsection}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titlespacing*{\subsubsection}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\begin{document}
+
+\author{PLUVIOSE Louis - KARAPETYAN Mikhail}
+
+\begin{center}
+{\LARGE \textbf{Rapport SAE5.ROM.03}}
+
+\vspace{1cm}
+
+{\Large {PLUVIOSE Louis - KARAPETYAN Mikhail}}
+
+\vspace{1cm}
+
+{\LARGE \textbf{Application de communication WebRTC}}
+
+\vspace{2cm}
+
+\includegraphics[width=7.5cm]{images/logo-iut-colmar.jpg}
+
+\vspace{0.5cm}
+
+\includegraphics[width=7.5cm]{images/logo-but-rt.png}
+
+\vspace{2cm}
+
+\textbf{Sujet proposé par : Monsieur Philipe Hensel} \\
+
+\vspace{1cm}
+
+Université de Haute-Alsace \\
+Institut Universitaire de Technologie de Colmar \\
+Département Réseaux et Télécommunications \\
+
+\vspace{3cm}
+
+{\large \mydate\today}
+
+\end{center}
+
+\newpage
+
+\tableofcontents
+
+\lstlistoflistings
+
+\listoffigures
+
+\newpage
+
+\section{Introduction}
+
+Dans un monde de plus en plus connecté, la communication en temps réel via Internet est devenue une nécessité cruciale, tant pour les interactions personnelles que professionnelles. Notre projet pour la SAE5.ROM.03, s'inscrit dans cette dynamique en offrant une solution de communication basée sur la technologie WebRTC (Web Real-Time Communication). Nous avons voulu via ce projet nous lancer un défi : celui de permettre des échanges audio et vidéo en temps réel directement depuis le navigateur web, sans nécessité de télécharger des logiciels tiers ou de créer des comptes d'utilisateur.\\
+
+La technologie WebRTC, un standard ouvert et gratuit, permet de réaliser des appels vidéo et audio de haute qualité avec une faible latence, garantissant ainsi une communication fluide et efficace. Notre application SAE5.ROM.03 est conçue pour être intuitive et facilement accessible, offrant une interface utilisateur élégante et des fonctionnalités adaptées à divers contextes, que ce soit pour des réunions, des sessions de travail collaboratif, ou des conversations personnelles.\\
+
+L'accent est mis sur la facilité d'utilisation. Les utilisateurs peuvent créer et rejoindre des salles de conférence virtuelles en quelques clics, tout en bénéficiant d'une connexion fiable. De plus, l'application prend en charge plusieurs participants.
+\newpage
+
+\section{Diagrammes de séquence}
+
+\subsection{Connexion à la salle de réunion}
+
+\begin{sequencediagram}
+  \newthread{c1}{Client 1}
+  \newinst[3]{s}{Server}
+  \newthreadShift{c2}{Client 2}{3cm}
+
+   % Connexion du client 1 et jointure à une salle
+   \begin{sdblock}{Join Room}{Client 1 rejoins une salle de vidéo conférence}
+    \begin{call}{c1}{join(roomId)}{s}{}
+    \end{call}
+  \end{sdblock}
+
+  % Connexion du client 2 à la même salle
+  \begin{sdblock}{Join Room}{Client 2 rejoins une salle de vidéo conférence}
+    \begin{call}{c2}{join(roomId)}{s}{}
+    \end{call}
+
+  \end{sdblock}
+
+  % Le serveur notifie le Client 2
+  \begin{messcall}{s}{new\_peer}{c2}
+  \end{messcall}
+
+  % Le serveur notifie le Client 2
+  \begin{messcall}{s}{new\_peer}{c1}
+  \end{messcall}
+\end{sequencediagram}
+
+\newpage
+
+\subsection{Connection WebRTC}
+
+\begin{sequencediagram}
+  \newthread{c1}{Client 1}
+  \newinst[3]{s}{Server}
+  \newthreadShift{c2}{Client 2}{3cm}
+
+  \begin{sdblock}{WebRTC Connection}{Échange d'offres et de réponses pour la diffusion de vidéos}
+    \begin{call}{c1}{createOffer()}{c1}{offer}
+    \end{call}
+    \begin{call}{c1}{setLocalDescription(offer)}{c1}{}
+    \end{call}
+    \begin{messcall}{c1}{offer}{s}
+    \end{messcall}
+    \begin{messcall}{s}{offer}{c2}
+    \end{messcall}
+
+    % Client 2 crée une réponse
+    \begin{call}{c2}{createAnswer()}{c2}{answer}
+    \end{call}
+    \begin{call}{c2}{setLocalDescription(answer)}{c2}{}
+    \end{call}
+    \begin{messcall}{c2}{answer}{s}
+    \end{messcall}
+    \begin{messcall}{s}{answer}{c1}
+    \end{messcall}
+  \end{sdblock}
+\end{sequencediagram}
+
+\newpage
+
+\subsection{Échanges de candidats ICE}
+
+\begin{sequencediagram}
+  \newthread{c1}{Client 1}
+  \newinst[3]{s}{Server}
+  \newthreadShift{c2}{Client 2}{3cm}
+
+  % ICE Candidate exchange
+  \begin{sdblock}{ICE Candidate Exchange}{}
+    \begin{messcall}{c1}{ICE Candidate}{s}
+    \end{messcall}
+    \begin{messcall}{s}{ICE Candidate}{c2}
+    \end{messcall}
+    \begin{messcall}{c2}{ICE Candidate}{s}
+    \end{messcall}
+    \begin{messcall}{s}{ICE Candidate}{c1}
+    \end{messcall}
+  \end{sdblock}
+
+  % Streaming video
+  \begin{messcall}{c1}{stream video/audio}{c2}
+  \end{messcall}
+  \begin{messcall}{c2}{stream video/audio}{c1}
+  \end{messcall}
+
+  % Hang up or disconnect
+  \begin{messcall}{c1}{disconnect}{s}
+  \end{messcall}
+  \begin{messcall}{s}{disconnect}{c2}
+  \end{messcall}
+\end{sequencediagram}
+
+\newpage
+
+\subsection{fonctionnalités supplémentaires}
+
+\begin{sequencediagram}
+
+  \newthread{c1}{Client 1}
+  \newinst[3]{s}{Server}
+  \newthreadShift{c2}{Client 2}{3cm}
+  % Additional interactions based on the given code
+  \begin{sdblock}{Additional Interactions}{}
+    \begin{messcall}{c1}{toggleMicrophone}{c1}
+    \end{messcall}
+    \begin{messcall}{c1}{toggleCamera}{c1}
+    \end{messcall}
+    \begin{messcall}{c2}{toggleMicrophone}{c2}
+    \end{messcall}
+    \begin{messcall}{c2}{toggleCamera}{c2}
+    \end{messcall}
+  \end{sdblock}
+
+\end{sequencediagram}
+
+\newpage
+
+\section{Utilisation de l'application}
+
+\newpage
+
+\section{Fonctionnement de l'application}
+
+\subsection{DOM Elements}
+
+Cette section récupère et stocke des références à divers éléments du DOM qui seront manipulés ou utilisés tout au long du script.\\
+
+\begin{lstlisting}[language=JavaScript, caption={DOM Elements}, label=DOM Elements]
+  const roomSelectionContainer = document.getElementById('room-selection-container');
+  const roomInput = document.getElementById('room-input');
+  const connectButton = document.getElementById('connect-button');
+  const videoChatContainer = document.getElementById('video-chat-container');
+  const localVideoComponent = document.getElementById('local-video');
+\end{lstlisting}
+
+\newpage
+
+\subsection{Variables}
+
+\begin{lstlisting}[language=JavaScript, caption={Variables}, label=Variables]
+  const socket = io();
+  const mediaConstraints = { audio: true, video: { width: 1280, height: 720 } };
+  let localStream;
+  let roomId;
+  let peerConnections = {}; // Dictionary to hold all peer connections
+  
+  const iceServers = {
+      iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' }, // Serveur STUN existant
+          // Ajout de la configuration TURN
+          {
+              urls: 'turn:relay1.expressturn.com:3478', // URL du serveur TURN
+              username: 'efJJ0L80U0GANH5V0A', // Nom d'utilisateur
+              credential: 'LO5Tdr8aoKohTHDL' // Mot de passe
+          }
+      ]
+  };
+\end{lstlisting}
+
+\begin{itemize}
+  \item \verb|socket| : Crée une connexion socket.io pour la communication en temps réel avec le serveur.
+  \item \verb|mediaConstraints| : Spécifie les contraintes des médias (audio et vidéo) pour WebRTC.
+  \item \verb|localStream| : Représente le flux média local (audio et vidéo) de l'utilisateur.
+  \item \verb|roomId| : Stocke l'ID de la salle de chat actuelle.
+  \item \verb|peerConnections| : Un dictionnaire pour stocker les connexions peer WebRTC.
+  \item \verb|iceServers| : Contient les serveurs STUN et TURN utilisés pour la traversée de NAT et le relais.
+\end{itemize}
+
+\newpage
+
+\subsection{Button Listeners}
+
+\begin{lstlisting}[language=JavaScript, caption={Button Listeners}, label=Button Listeners]
+  connectButton.addEventListener('click', () => {
+  joinRoom(roomInput.value);
+});
+
+const hangUpButton = document.getElementById('hangup-button');
+const toggleMicButton = document.getElementById('toggle-mic-button');
+const toggleCameraButton = document.getElementById('toggle-camera-button');
+
+hangUpButton.addEventListener('click', hangUpCall);
+toggleMicButton.addEventListener('click', toggleMicrophone);
+toggleCameraButton.addEventListener('click', toggleCamera);
+
+let isRoomCreator = false;
+\end{lstlisting}
+
+\begin{itemize}
+  \item \verb|connectButton.addEventListener| : Écouteur d'événements pour le bouton de connexion pour rejoindre une salle.
+  \item \verb|hangUpButton.addEventListener| : Écouteur d'événements pour le bouton de raccrochage.
+  \item \verb|toggleMicButton.addEventListener| :  Écouteur d'événements pour activer/désactiver le microphone.
+  \item \verb|toggleCameraButton.addEventListener| : Écouteur d'événements pour activer/désactiver la caméra.
+\end{itemize}
+
+\newpage
+
+\subsection{Socket Event Callbacks}
+
+\begin{lstlisting}[language=JavaScript, caption={Socket Event Callbacks}, label=Socket Event Callbacks]
+  socket.on('room_created', async () => {
+  console.log('Socket event callback: room_created');
+  await setLocalStream(mediaConstraints);
+  isRoomCreator = true;
+});
+
+socket.on('room_joined', async () => {
+  console.log('Socket event callback: room_joined');
+  await setLocalStream(mediaConstraints);
+  isRoomCreator = false;
+  socket.emit('start_call', roomId);
+}); 
+
+socket.on('full_room', () => {
+  console.log('Socket event callback: full_room');
+  alert('The room is full, please try another one');
+});
+
+socket.on('start_call', async () => {
+  console.log('Socket event callback: start_call');
+  if (isRoomCreator) {
+    createPeerConnections();
+  }
+});
+
+socket.on('webrtc_offer', async (data) => {
+  console.log('Socket event callback: webrtc_offer');
+  
+  if (!localStream) {
+    console.log("Waiting to set local stream before handling offer");
+    await setLocalStream(mediaConstraints);
+  }
+  
+  if (!peerConnections[data.peerId]) {
+    await setupPeerConnection(data.peerId, false); // false = not an initiator
+  }
+  await handleOffer(data);
+});
+
+socket.on('webrtc_answer', (data) => {
+  console.log('Socket event callback: webrtc_answer');
+  handleAnswer(data);
+});
+
+socket.on('webrtc_ice_candidate', (data) => {
+  console.log('Socket event callback: webrtc_ice_candidate');
+  handleIceCandidate(data);
+});
+
+socket.on('new_peer', async (peerId) => {
+  console.log('Socket event callback: new_peer');
+  await createPeerConnection(peerId, false);
+});
+\end{lstlisting}
+
+\begin{itemize}
+  \item \verb|socket.on('room_created')| : Gère l'événement de création de salle.
+  \item \verb|socket.on('room_joined')| : Gère l'événement de rejoindre une salle.
+  \item \verb|socket.on('full_room')| : Gère l'événement lorsque la salle est pleine.
+  \item \verb|socket.on('start_call')| : Gère le début d'un appel WebRTC.
+  \item \verb|socket.on('webrtc_offer')| : Gère la réception d'une offre WebRTC.
+  \item \verb|socket.on('webrtc_answer')| : Gère la réception d'une réponse WebRTC.
+  \item \verb|socket.on('webrtc_ice_candidate')| : Gère la réception d'un candidat ICE.
+  \item \verb|socket.on('new_peer')| : Gère l'ajout d'un nouveau pair dans la salle.
+\end{itemize}
+
+\newpage
+
+\subsection{Fonctions Principales}
+
+\begin{lstlisting}[language=JavaScript, caption={Fonctions Principales}, label=Fonctions Principales]
+    async function joinRoom(room) {
+    if (room === '') {
+      alert('Please type a room ID');
+    } else {
+      roomId = room;
+      socket.emit('join', room);
+      showVideoConference();
+      
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+        document.getElementById('local-video').srcObject = localStream;
+      } catch (error) {
+        console.error('Could not get user media', error);
+      }
+    }
+  }
+
+  function showVideoConference() {
+    roomSelectionContainer.style = 'display: none';
+    videoChatContainer.style = 'display: block';
+
+    // Masquer le texte d'attente
+    const waitingText = document.getElementById('waitingText');
+    if (waitingText) {
+      waitingText.style.display = 'none';
+    }
+  }
+
+
+  async function setLocalStream(mediaConstraints) {
+    if (!localStream) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+        console.log('Local stream obtained', stream);
+        localStream = stream;
+        const localVideoComponent = document.getElementById('local-video');
+        if (localVideoComponent) {
+          localVideoComponent.srcObject = stream;
+        } else {
+          console.error('The local video element was not found in the DOM.');
+        }
+      } catch (error) {
+        console.error('Could not get user media', error);
+      }
+    }
+  }
+
+  async function handleNewPeer(peerId) {
+    const peerConnection = await createPeerConnection(peerId);
+    localStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream);
+    });
+
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('webrtc_offer', {
+      type: 'webrtc_offer',
+      sdp: offer,
+      roomId,
+      peerId,
+    });
+  }
+
+  async function setupPeerConnection(peerId, isInitiator) {
+    const peerConnection = new RTCPeerConnection(iceServers);
+
+    if (localStream) {
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    } else {
+      console.error("Local stream is not defined in setupPeerConnection");
+      return;
+    }
+
+    peerConnection.ontrack = (event) => addRemoteStream(event.streams[0], peerId);
+    peerConnection.onicecandidate = (event) => handleIceEvent(event, peerId);
+
+    peerConnections[peerId] = peerConnection;
+
+    if (isInitiator) {
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      socket.emit('webrtc_offer', { roomId, sdp: offer, peerId });
+    }
+  }
+
+  function addRemoteStream(event, peerId) {
+    let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+    if (!remoteVideoElement) {
+      remoteVideoElement = createRemoteVideoElement(peerId);
+    }
+
+    let stream;
+    if (event.streams && event.streams.length > 0) {
+      // Use the stream from the event if it exists
+      stream = event.streams[0];
+    } else {
+      // Create a new stream and add the track to it
+      stream = new MediaStream();
+      if (event.track) {
+        stream.addTrack(event.track);
+      }
+    }
+
+    // Additional logging to debug
+    console.log(`Adding remote stream for peer ${peerId}`, stream);
+    if (stream.getTracks().length === 0) {
+      console.error('No tracks in the remote stream');
+    }
+
+    remoteVideoElement.srcObject = stream;
+    remoteVideoElement.muted = false; // Ensure remote video is not muted
+    remoteVideoElement.volume = 1; // Ensure volume is set to maximum
+  }
+
+  function createRemoteVideoElement(peerId) {
+    const remoteVideo = document.createElement('video');
+    remoteVideo.id = `remote-video-${peerId}`;
+    remoteVideo.autoplay = true;
+    remoteVideo.playsInline = true;
+    remoteVideo.classList.add('remote-video', ...tailwindClasses);
+
+    document.getElementById('remote-videos-container')
+          .appendChild(remoteVideo);
+    return remoteVideo;
+  }
+
+
+  async function handleIceEvent(event, peerId) {
+    if (event.candidate) {
+      socket.emit('webrtc_ice_candidate', {
+        roomId,
+        candidate: event.candidate,
+        peerId
+      });
+    }
+  }
+
+  async function createPeerConnection(peerId) {
+    const peerConnection = new RTCPeerConnection(iceServers);
+
+    \begin{verbatim}
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    \end{verbatim}
+      // localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    \end{verbatim}
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    // Gestion de l'ajout des streams distants
+    peerConnection.ontrack = (event) => addRemoteStream(event, peerId);
+
+    // Gestion de l'ajout des streams distants
+    peerConnection.ontrack = (event) => {
+    let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+    if (!remoteVideoElement) {
+      remoteVideoElement = document.createElement('video');
+      remoteVideoElement.id = `remote-video-${peerId}`;
+      remoteVideoElement.autoplay = true;
+      remoteVideoElement.playsInline = true;
+      remoteVideoElement.classList.add('remote-video');
+      document.getElementById('remote-videos-container')
+          .appendChild(remoteVideoElement);
+    }
+    remoteVideoElement.srcObject = event.streams[0];
+  };
+
+
+    // Gestion des candidats ICE
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log(`Sending ICE candidate to peer ${peerId}`, event.candidate);
+        socket.emit('webrtc_ice_candidate', {
+          type: 'webrtc_ice_candidate',
+          candidate: event.candidate,
+          roomId,
+          peerId,
+        });
+      }
+    };
+
+    peerConnections[peerId] = peerConnection;
+
+    \usepackage{lastpage}
+    if (!isRoomCreator) {
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      socket.emit('webrtc_offer', {
+        type: 'webrtc_offer',
+        sdp: offer,
+        roomId,
+        peerId,
+      });
+    }
+  }
+
+
+  async function handleOffer(data) {
+    try {
+      if (!peerConnections[data.peerId]) {
+        await createPeerConnection(data.peerId);
+      }
+
+      const peerConnection = peerConnections[data.peerId];
+      console.log(\texttt{\'{E}tat} de la connexion Peer avant setRemoteDescription: $\backslash$texttt{${peerConnection.signalingState}}$`);
+
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+
+      // Process cached ICE candidates
+      if (peerConnection.cachedIceCandidates) {
+        peerConnection.cachedIceCandidates.forEach(cachedCandidate => {
+          peerConnection.addIceCandidate(new RTCIceCandidate(cachedCandidate));
+        });
+        peerConnection.cachedIceCandidates = [];
+      }
+
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+
+      socket.emit('webrtc_answer', {
+        type: 'webrtc_answer',
+        sdp: answer,
+        roomId,
+        peerId: data.peerId,
+      });
+    } catch (error) {
+      console.error(`Erreur dans handleOffer pour le pair ${data.peerId}:`, error);
+    }
+  }
+
+  async function handleAnswer(data) {
+    const peerConnection = peerConnections[data.peerId];
+    console.log(`Peer connection state before setting remote description: ${peerConnection.signalingState}`);
+
+    if (peerConnection.signalingState === 'have-local-offer') {
+      try {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        console.log(`Remote description set for peer ${data.peerId}`);
+      } catch (error) {
+        console.error(`Error in handleAnswer for peer ${data.peerId}:`, error);
+      }
+    } else {
+      console.log(`Peer connection not in the correct state to set remote description, current state: ${peerConnection.signalingState}`);
+    }
+  }
+
+
+  async function handleIceCandidate(data) {
+    const peerConnection = peerConnections[data.peerId];
+    if (peerConnection) {
+      if (!peerConnection.remoteDescription) {
+        console.log("Queueing ICE candidate as remote description is not yet set");
+        if (!peerConnection.cachedIceCandidates) {
+          peerConnection.cachedIceCandidates = [];
+        }
+        peerConnection.cachedIceCandidates.push(data.candidate);
+      } else {
+        console.log("Adding ICE candidate");
+        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+      }
+    }
+  }
+
+
+
+  function handleNewICECandidateMsg(data) {
+    const peerConnection = peerConnections[data.peerId];
+    peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+  }
+
+  function sendIceCandidate(candidate, peerId) {
+    socket.emit('webrtc_ice_candidate', {
+      roomId,
+      candidate,
+      peerId,
+    });
+  }
+
+  function addVideoStream(videoElement, stream, isLocal = false) {
+    \texttt{console.log('Adding videoElement.srcObject = stream;')}
+    videoElement.srcObject = stream;
+    videoElement.autoplay = true;
+    videoElement.playsInline = true;
+    videoElement.muted = isLocal;
+    if (isLocal) {
+      videoElement.id = 'local-video';
+      videoElement.style.backgroundColor = 'red'; 
+    } else {
+      videoElement.classList.add('remote-video');
+      videoElement.style.backgroundColor = 'green'; 
+    }
+    videoChatContainer.appendChild(videoElement);
+  }
+
+  function handleRemoteStreamAdded(stream, peerId) {
+    console.log(`handleRemoteStreamAdded called with peerId: ${peerId}`);
+    let videoElementId = `remote-video-${peerId}`;
+    let remoteVideoElement = document.getElementById(videoElementId);
+    
+    if (!remoteVideoElement) {
+      console.log(`Creating new video element for peer ${peerId}`);
+      remoteVideoElement = document.createElement('video');
+      remoteVideoElement.id = videoElementId;
+      remoteVideoElement.autoplay = true;
+      remoteVideoElement.playsInline = true;
+      remoteVideoElement.classList.add('remote-video');
+      document.getElementById('remote-videos-container')
+            .appendChild(remoteVideoElement);
+    }
+    else {
+      console.log(`Replacing video element for peer ${peerId}`);
+    }
+
+    remoteVideoElement.srcObject = stream;
+  }
+
+
+
+  function hangUpCall() {
+    console.log("Hang Up Call");
+    for (let peerId in peerConnections) {
+      peerConnections[peerId].close();
+      delete peerConnections[peerId];
+    }
+
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      localStream = null;
+    }
+
+    let remoteVideosContainer = document.getElementById('remote-videos-container');
+    while (remoteVideosContainer.firstChild) {
+      remoteVideosContainer.removeChild(remoteVideosContainer.firstChild);
+    }
+
+    const waitingText = document.getElementById('waitingText');
+    if (waitingText) {
+      waitingText.style.display = 'block';
+    }
+
+    videoChatContainer.style.display = 'none';
+
+    roomSelectionContainer.style.display = 'none';
+  }
+
+
+  function toggleMicrophone() {
+    const audioTrack = localStream.getAudioTracks()[0];
+    if (audioTrack) {
+      audioTrack.enabled = !audioTrack.enabled;
+      console.log("Microphone toggled. Now enabled:", audioTrack.enabled);
+
+      // Update the track on all peer connections
+      for (let peerId in peerConnections) {
+        const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === audioTrack.kind);
+        if (sender) {
+          sender.replaceTrack(audioTrack);
+        }
+      }
+    }
+  }
+
+
+  function toggleCamera() {
+    const videoTrack = localStream.getVideoTracks()[0];
+    if (videoTrack) {
+      videoTrack.enabled = !videoTrack.enabled;
+      console.log("Camera toggled. Now enabled:", videoTrack.enabled);
+
+      // Update the track on all peer connections
+      for (let peerId in peerConnections) {
+        const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === videoTrack.kind);
+        if (sender) {
+          sender.replaceTrack(videoTrack);
+        }
+      }
+    }
+  }
+\end{lstlisting}
+
+\begin{itemize}
+  \item \verb|async function joinRoom(room)| : Rejoint une salle de chat en utilisant WebRTC.
+  \item \verb|function showVideoConference()| : Affiche l'interface de la vidéoconférence.
+  \item \verb|async function setLocalStream(mediaConstraints)| : Configure le flux média local.
+  \item \verb|async function handleNewPeer(peerId)| : Gère l'ajout d'un nouveau pair.
+  \item \verb|async function setupPeerConnection(peerId, isInitiator)| : Configure la connexion peer WebRTC.
+  \item \verb|function addRemoteStream(event, peerId)| : Ajoute un flux média distant à l'élément vidéo.
+  \item \verb|function createRemoteVideoElement(peerId)| : Crée un nouvel élément vidéo pour un pair distant.
+  \item \verb|async function handleIceEvent(event, peerId)| : Traite les événements de candidat ICE.
+  \item \verb|async function createPeerConnection(peerId)| : Crée une nouvelle connexion peer WebRTC.
+  \item \verb|async function handleOffer(data)| : Traite une offre WebRTC reçue.
+  \item \verb|async function handleAnswer(data)| : Traite une réponse WebRTC reçue.
+  \item \verb|async function handleIceCandidate(data)| : Traite un candidat ICE WebRTC reçu.
+  \item \verb|function handleNewICECandidateMsg(data)| : Ajoute un nouveau candidat ICE à la connexion peer.
+  \item \verb|function sendIceCandidate(candidate, peerId)| : Envoie un candidat ICE au serveur.
+  \item \verb|function addVideoStream(videoElement, stream, isLocal)| : Ajoute un flux vidéo à un élément vidéo.
+  \item \verb|function handleRemoteStreamAdded(stream, peerId)| : Gère l'ajout d'un flux média distant.
+  \item \verb|function hangUpCall()| : Gère la fin d'un appel.
+  \item \verb|function toggleMicrophone()| : Active ou désactive le microphone.
+  \item \verb|function toggleCamera()| : Active ou désactive la caméra.
+\end{itemize}
+
+\newpage
+
+\newpage
+
+\section{UI/UX de l'application}
+L'expérience utilisateur (UX) et la conception de l'interface utilisateur (UI) jouent un rôle essentiel dans le succès d'une application web. Cette partie du rapport se penche attentivement sur ces deux aspects cruciaux, examinant de près l'UI/UX de l'application en question. Notre objectif est de fournir une évaluation approfondie de la convivialité, de l'esthétique et de la fonctionnalité de l'interface, ainsi que de l'expérience globale qu'elle offre à ses utilisateurs.
+
+Au cours de cette analyse, nous examinerons la conception visuelle, la facilité de navigation et la réactivité sur différentes plateformes. À travers cette démarche, nous chercherons à identifier les points forts de l'application ainsi que les domaines qui pourraient bénéficier d'améliorations. Les recommandations formulées dans ce rapport visent à optimiser l'interaction des utilisateurs avec l'application, favorisant ainsi une expérience utilisateur exceptionnelle.
+
+
+
+
+\subsection{Contexte de l'Application}
+\subsection{La Navigation}
+\subsection{Analyse de l'UI (Interface Utilisateur)}
+\subsection{Analyse de l'UX (Expérience Utilisateur)}
+\subsection{Recommandations et Améliorations}
+
+
+
+
+
+\newpage
+
+\section{Installation de l'application}
+
+\subsection{Installation en dur}
+
+ATTENTION : au préalable, il faut installer NodeJS et NPM sur la machine !\\
+
+Pour installer l'application en dur, il suffit de cloner le dépôt git suivant : \url{}{}.\\
+
+Ensuite, il faut naviger dans le dossier \verb|SAE5.ROM.03/webssr| et lancer la commande \verb|npm install| pour installer les dépendances.\\
+Enfin, il faut lancer la commande \verb|npm run build| puis \verb|node ./run-server.mjs| pour lancer l'application.\\
+
+\subsection{Installation en Docker}
+
+ATTENTION : au préalable, il faut installer Docker sur la machine !\\
+
+Pour installer l'application en Docker, il suffit de cloner le dépôt git suivant : \url{}{}.\\
+
+Ensuite, il faut naviger dans le dossier \verb|SAE5.ROM.03/docker| et lancer la commande \verb|docker build -t nom-de-votre-application| pour construire l'image Docker.\\
+
+Enfin, il faut lancer la commande \verb|docker run -p 3000:3000 nom-de-votre-application| pour lancer l'application.\\
+
+\newpage
+
+\section{Bugs}
+
+\subsection{Bugs connus}
+
+Nous avons pu détecter 2 bugs dans notre application.\\
+
+\subsubsection{Premier bug}
+
+Lors de certains appels, il arrive que la connexion se fasse mal et que un des interlocuteurs ne voit pas l'autre. Voici plusieurs façon de résolver ce problème :\\
+
+\begin{itemize}
+  \item 1 : Il faut recliquer sur le bouton "Rejoindre la réunion"
+  \item 2 : Si le problème persiste, Recharger la page
+  \item 3 : Si le problème persiste toujours, il faut quitter la salle et en rejoindre une nouvelle
+\end{itemize}
+
+\subsubsection{Deuxième bug}
+
+Au moment de raccrocher l'appel, il se peut la vidéo de l'autre interlocuteur reste affichée. Pour résoudre ce problème, il faut rafraichir la page.\\
+
+\subsection{Bugs inconnus}
+
+Si vous rencontrez d'autres bugs, merci de nous les signaler à l'adresse suivante : \url{mailto:contact@louispluviose.fr}{contact@louispluviose.fr}.
+
+\newpage
+
+\section{Annexes}
+
+\subsection{Sous-titre 1}
+
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse auctor elit vitae mauris dignissim bibendum. Fusce facilisis, sapien sed varius finibus, quam lacus auctor lorem, ac dapibus sapien ante quis odio. Sed tincidunt pharetra dui, in ultricies enim tincidunt ac. Suspendisse quis tincidunt justo. Duis interdum vitae ipsum ac venenatis. Nullam bibendum ex ac nisl tristique, vel euismod ex faucibus.\\
+
+\subsection{Sous-titre 2}
+
+\begin{lstlisting}[language=Python, caption={Exemple de code Python}, label=mon-code-python]
+	def hello(name):
+	  print("Hello, " + name + "!")
+	
+	hello("World")
+\end{lstlisting}
+
+\newpage
+
+\section{Conclusion}
+
+Ce projet a représenté un défi stimulant et enrichissant pour notre groupe. L'opportunité d'explorer et de maîtriser la technologie WebRTC a marqué une étape importante dans notre parcours de développement. La création d'une application de communication en temps réel nous a permis non seulement d'approfondir nos compétences en Docker et NodeJS, mais aussi de comprendre les subtilités de la communication en ligne moderne.\\
+
+Bien que nous ayons nourri l'ambition d'intégrer des fonctionnalités supplémentaires telles que le partage d'écran, un tableau blanc interactif, la gestion de contacts, la création de comptes utilisateurs, et même la liaison avec un serveur Asterisk, le temps imparti n'a pas suffi pour réaliser toutes ces idées. Cependant, cette limitation n'a en rien diminué notre fierté face aux accomplissements réalisés. Nous avons réussi à créer une application fonctionnelle et intuitive, dotée de fonctionnalités de base efficaces et faciles à utiliser.\\
+
+Ce sentiment d'accomplissement est renforcé par notre engagement à poursuivre le développement de ce projet. Notre vision à long terme est de le rendre plus complet, plus performant et de le transformer en un produit open source. En continuant à travailler sur ce projet, nous espérons non seulement enrichir notre propre expérience, mais également contribuer à la communauté en offrant une solution de communication avancée et accessible à tous.\\
+
+En somme, ce projet est plus qu'une simple réalisation technique ; il représente notre passion pour l'innovation et notre désir de repousser les limites de ce qui est possible dans le domaine de la communication numérique. Nous sommes impatients de voir où ce chemin nous mènera et sommes déterminés à faire de ce projet une référence dans le monde de la communication WebRTC.\\
+
+\end{document}
