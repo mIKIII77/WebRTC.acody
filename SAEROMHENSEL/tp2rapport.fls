@@ -1,6 +1,6 @@
 PWD /Users/karapetyan/Documents/Documents - Mikhail’s MacBook Pro/GitHub.nosync/SAE5.ROM.03/SAE5.ROM.03/SAEROMHENSEL
 INPUT /usr/local/texlive/2022/texmf.cnf
 INPUT /usr/local/texlive/2022/texmf-dist/web2c/texmf.cnf
-INPUT /usr/local/texlive/2022/texmf-var/web2c/pdftex/latex.fmt
-INPUT tp2rapport.tex
+INPUT /usr/local/texlive/2022/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT /Users/karapetyan/Documents/Documents - Mikhail’s MacBook Pro/GitHub.nosync/SAE5.ROM.03/SAE5.ROM.03/SAEROMHENSEL/tp2rapport.tex
 OUTPUT tp2rapport.log
