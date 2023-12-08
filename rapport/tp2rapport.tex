@@ -841,10 +841,163 @@ L'expérience utilisateur (UX) et la conception de l'interface utilisateur (UI) 
 
 Au cours de cette analyse, nous examinerons la conception visuelle, la facilité de navigation et la réactivité sur différentes plateformes. À travers cette démarche, nous chercherons à identifier les points forts de l'application ainsi que les domaines qui pourraient bénéficier d'améliorations. Les recommandations formulées dans ce rapport visent à optimiser l'interaction des utilisateurs avec l'application, favorisant ainsi une expérience utilisateur exceptionnelle.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/PageReunionApplication.png}
+    \caption{Page Réunion de l'application}
+\end{figure}
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/PageMessagerieApplication.png}
+    \caption{Page Messagerie de l'application}
+\end{figure}
 
+\section{Technologies utilisées}
+\subsection{Astro.js - Framework frontend utilisé}
+Nous avons utilisé le framework Astro.js pour la réalisation de la partie frontend de notre application web. C'est un framework récent sur le marché qui adopte une approche "server-first", privilégiant le rendu côté serveur par rapport au rendu côté client dans le navigateur. Cela offre des performances très élevées, ce qui nous intéresse dans le cas de notre projet. De plus, sa compatibilité avec des frameworks tels que "TailwindCSS" et "React.js" nous a permis d'appliquer un design moderne et convivial pour l'utilisateur.
 
-\subsection{Contexte de l'Application}
+\subsection{TailwindCSS et React.js}
+Tailwind CSS est un framework CSS utilitaire qui simplifie le développement et la stylisation des interfaces utilisateur. Contrairement aux frameworks CSS traditionnels basés sur des composants prédéfinis, Tailwind CSS fournit des classes utilitaires directement applicables dans le code HTML. Ces classes permettent de définir rapidement et de manière cohérente des styles tels que la couleur, la taille, la marge, le rembourrage, etc. L'approche de Tailwind CSS encourage une flexibilité accrue tout en offrant une base solide pour la conception.
+
+React.js est une bibliothèque JavaScript développée par Facebook pour la construction d'interfaces utilisateur interactives. React utilise une approche basée sur les composants, permettant de créer des morceaux d'interface réutilisables et modulaires. Cette approche facilite la gestion de l'état de l'application et la mise à jour dynamique de l'interface en réponse aux changements.
+
+Dans le cadre de notre projet, nous avons utilisé Tailwind CSS pour simplifier la stylisation en exploitant ses classes utilitaires directement dans le code HTML. Cela a accéléré le processus de conception en nous permettant de définir rapidement et de manière cohérente les styles des éléments.
+
+Parallèlement, nous avons intégré React.js pour structurer l'interface utilisateur de manière modulaire. Les composants React ont été utilisés pour diviser l'application en parties réutilisables, facilitant ainsi la maintenance et la gestion de l'état global de l'application.
+
+\section{Contexte de l'Application}
+L'application vise à faciliter les réunions virtuelles en temps réel. Elle offre une plateforme pour la communication vidéo instantanée, améliorant ainsi la collaboration à distance. Les fonctionnalités clés comprennent la possibilité d'entrer dans une salle de réunion en utilisant un numéro spécifique, la gestion du son et de la caméra, ainsi que la capacité à abandonner les appels en un clic.
+En plus des fonctionnalités de réunion vidéo en temps réel, l'application intègre également une fonctionnalité de messagerie pour une communication asynchrone entre les utilisateurs. Cette fonctionnalité permet aux utilisateurs d'échanger des messages textuels, complétant ainsi l'expérience de communication collaborative.
+
+\subsection{Public Cible}
+L'application cible un large éventail d'utilisateurs professionnels cherchant à optimiser leurs réunions virtuelles. Elle s'adresse particulièrement aux équipes travaillant à distance, aux entreprises cherchant à améliorer la communication interne et externe, ainsi qu'aux individus ayant besoin d'une solution efficace pour les réunions en ligne.
+
+\subsection{Objectifs de l'Application (Réunions)}
+\begin{enumerate}
+    \item \textbf{Faciliter les Réunions Virtuelles :} Offrir une plateforme conviviale pour l'organisation de réunions virtuelles.
+    \item \textbf{Communication Vidéo en Temps Réel :} Permettre des appels vidéo en temps réel pour une interaction plus dynamique.
+    \item \textbf{Simplicité d'Utilisation :} Assurer une expérience utilisateur intuitive pour maximiser l'adoption de l'application.
+    \item \textbf{Optimiser la Collaboration à Distance :} Fournir des fonctionnalités simples et efficaces pour améliorer la collaboration à distance.
+\end{enumerate}
+
+\subsection{Objectifs de l'Application (Messagerie)}
+\begin{enumerate}
+    \item \textbf{Communication Asynchrone :} Fournir une plateforme de messagerie pour permettre des échanges asynchrones entre les utilisateurs.
+    \item \textbf{Facilité d'Utilisation :} Assurer une interface conviviale pour la saisie et l'envoi de messages.
+    \item \textbf{Identité de l'Utilisateur :} Permettre aux utilisateurs de spécifier leur nom d'utilisateur pour une identification personnalisée.
+\end{enumerate}
+
+\subsection{Principales Fonctionnalités (Réunions)}
+\begin{enumerate}
+    \item \textbf{Entrée dans une Salle de Réunion :} Les utilisateurs peuvent rejoindre une salle de réunion en saisissant un numéro spécifique.
+    \item \textbf{Gestion du Son et de la Caméra :} Contrôle de la fonction audio et vidéo pour une expérience personnalisée.
+    \item \textbf{Abandonner les Appels en un Clic :} Facilité pour quitter rapidement une réunion.
+    \item \textbf{Affichage Vidéo en Temps Réel :} Possibilité de visualiser les flux vidéo en temps réel des participants.
+\end{enumerate}
+
+\subsection{Principales Fonctionnalités (Messagerie)}
+\begin{enumerate}
+    \item \textbf{Saisie de Nom d'Utilisateur :} Les utilisateurs peuvent entrer leur nom d'utilisateur pour une identification personnalisée.
+    \item \textbf{Saisie de Message :} Interface pour la saisie et l'envoi de messages texte.
+    \item \textbf{Affichage des Messages :} Les messages échangés sont affichés dans une interface dédiée.
+    \item \textbf{Styles Différenciés :} Les messages de l'utilisateur actuel sont stylisés différemment pour une distinction visuelle.
+\end{enumerate}
+
+\subsection{Implémentation Technique (Réunions)}
+\begin{enumerate}
+    \item \textbf{Utilisation de Socket.io :} Les connexions peer-to-peer WebRTC sont établies via les événements de socket, notamment les événements \texttt{room\_created}, \texttt{room\_joined}, et \texttt{start\_call}.
+    \item \textbf{RTCPeerConnection :} Pour créer et gérer les connexions peer-to-peer.
+    \item \textbf{Interface Utilisateur :} La partie vidéo est divisée en un conteneur local et plusieurs conteneurs distants.
+\end{enumerate}
+
+\subsection{Implémentation Technique (Messagerie)}
+\begin{enumerate}
+    \item \textbf{Utilisation de Socket.io :} La messagerie utilise Socket.io pour la gestion des communications en temps réel.
+    \item \textbf{Identifiant Unique de l'Utilisateur :} Chaque utilisateur est associé à un identifiant unique généré au moment de la connexion.
+    \item \textbf{Événements Socket.io :} L'application utilise des événements Socket.io tels que 'connect' et 'chat\_message' pour gérer la communication.
+\end{enumerate}
+
+\section{Analyse UI/UX}
+\subsection{Navigation}
+La navigation au sein de l'application s'effectue via une barre de navigation positionnée en haut de la page. Cette barre comprend deux boutons : "Réunions" et "Messages". L'utilisateur final est ainsi invité à faire son choix à travers cette barre de navigation, lui offrant une manière claire et accessible d'accéder aux fonctionnalités désirées.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/NavBarPC.png}
+    \caption{Barre de navigation sur un écran large}
+\end{figure}
+
+\subsubsection{Réalisation Technique}
+Le code source est présent en annexe (voir Annexe X). Voici une explication technique à travers différents points sur la structure de la "NavBar" (barre de navigation) de l'application.
+
+\begin{enumerate}
+    \item \textbf{Structure HTML et classes CSS :}
+    - La structure de la barre de navigation est définie dans une balise \texttt{header}.
+    - La classe \texttt{lg:flex} rend la barre de navigation flexible sur les écrans de taille large.
+    - La balise \texttt{Astronav} encapsule l'ensemble de la barre de navigation.
+
+    \item \textbf{Logo et titre :}
+    - Un logo représenté par un fichier SVG est inclus, utilisant la classe \texttt{icon}.
+    - Le titre de la page, "WebRTC.Acody," est placé à côté du logo et est stylisé avec des classes CSS.
+
+    \item \textbf{Bouton de menu pour les écrans de taille réduite :}
+    - Pour les écrans de taille réduite (inférieure à lg), un bouton de menu est affiché grâce à la classe \texttt{icon-menus}.
+
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/NavBarMobileClose.png}
+    \caption{Bouton de menu pour les écrans de taille réduite}
+\end{figure}
+
+\begin{enumerate}
+    \item[4.] \textbf{MenuItems et liens de navigation :}
+    - La balise \texttt{MenuItems} enveloppe la liste de navigation et la classe \texttt{hidden} la rend initialement invisible sur les écrans larges.
+    - La liste de navigation est structurée avec des liens vers les sections du site telles que "Réunion," "Messages".
+
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/NavBarMobileOpen.png}
+    \caption{Menu ouvert sur les écrans de taille réduite}
+\end{figure}
+
+\begin{enumerate}
+    \item[5.] \textbf{Styles CSS :}
+    - Des styles CSS personnalisés sont définis pour les séparateurs, les liens de la liste, le survol des liens, l'opacité, et les filtres d'image.
+    - Des classes telles que \texttt{separator-mob} sont utilisées pour ajuster le style en fonction de la taille de l'écran.
+    - Les filtres d'image, tels que \texttt{hue-rotate}, sont appliqués pour des effets visuels lors du survol.
+
+    \item[6.] \textbf{Media Queries :}
+    - Des règles de media queries sont utilisées pour adapter le style en fonction de la largeur de l'écran.
+    - Les séparateurs sont masqués sur les écrans de taille réduite, et des styles spécifiques sont appliqués aux éléments pour une meilleure lisibilité.
+\end{enumerate}
+
+\subsubsection{Expérience utilisateur}
+\begin{enumerate}
+    \item[1.] \textbf{Clarté et Simplicité :}
+    - La barre de navigation est simple et claire, avec seulement deux boutons principaux : "Réunions" et "Messages". Cela évite toute confusion et facilite la navigation.
+
+    \item[2.] \textbf{Logo et Titre :}
+    - L'inclusion d'un logo et du titre "WebRTC.Acody" renforce l'identité visuelle de la page. Cela améliore la reconnaissance du projet et aide les utilisateurs à comprendre le contexte de la page.
+  
+    \item[3.] \textbf{Adaptabilité pour les Petits Écrans :}
+    - La barre de navigation est conçue pour s'adapter aux petits écrans. L'utilisation d'un bouton de menu (MenuIcon) pour les écrans de taille réduite montre une considération pour les utilisateurs sur des appareils mobiles.
+
+    \item[4.] \textbf{Effets Visuels au Survole :}
+    - Les effets visuels au survol, tels que le changement d'opacité et la rotation de teinte, ajoutent une dimension interactive à la barre de navigation, améliorant l'expérience visuelle.
+
+\end{enumerate}
+\subsection{Page - Réunion}
+
+\subsection{Page - Messagerie}
+
+\section{Conclusion de l'analyse UI/UX}
+\end{document}
+
 \subsection{La Navigation}
 \subsection{Analyse de l'UI (Interface Utilisateur)}
 \subsection{Analyse de l'UX (Expérience Utilisateur)}
