@@ -13,6 +13,8 @@
 \usepackage{pdflscape}
 \usepackage{hyperref}
 
+\usepackage{geometry}
+\geometry{hmargin=2.5cm,vmargin=1.5cm}
 
 \newdateformat{mydate}{\THEDAY\space\monthname[\THEMONTH]\space\THEYEAR}
 
@@ -427,80 +429,410 @@ socket.on('new_peer', async (peerId) => {
 
 \newpage
 
-\subsection{title}
+\subsection{Fonctions Principales}
 
-\begin{lstlisting}[language=JavaScript, caption={Variables}, label=Variables]
-  const socket = io();
-  const mediaConstraints = { audio: true, video: { width: 1280, height: 720 } };
-  let localStream;
-  let roomId;
-  let peerConnections = {}; // Dictionary to hold all peer connections
-  
-  const iceServers = {
-      iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' }, // Serveur STUN existant
-          // Ajout de la configuration TURN
-          {
-              urls: 'turn:relay1.expressturn.com:3478', // URL du serveur TURN
-              username: 'efJJ0L80U0GANH5V0A', // Nom d'utilisateur
-              credential: 'LO5Tdr8aoKohTHDL' // Mot de passe
-          }
-      ]
+\begin{lstlisting}[language=JavaScript, caption={Fonctions Principales}, label=Fonctions Principales]
+    async function joinRoom(room) {
+    if (room === '') {
+      alert('Please type a room ID');
+    } else {
+      roomId = room;
+      socket.emit('join', room);
+      showVideoConference();
+      
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+        document.getElementById('local-video').srcObject = localStream;
+      } catch (error) {
+        console.error('Could not get user media', error);
+      }
+    }
+  }
+
+  function showVideoConference() {
+    roomSelectionContainer.style = 'display: none';
+    videoChatContainer.style = 'display: block';
+
+    // Masquer le texte d'attente
+    const waitingText = document.getElementById('waitingText');
+    if (waitingText) {
+      waitingText.style.display = 'none';
+    }
+  }
+
+
+  async function setLocalStream(mediaConstraints) {
+    if (!localStream) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+        console.log('Local stream obtained', stream);
+        localStream = stream;
+        const localVideoComponent = document.getElementById('local-video');
+        if (localVideoComponent) {
+          localVideoComponent.srcObject = stream;
+        } else {
+          console.error('The local video element was not found in the DOM.');
+        }
+      } catch (error) {
+        console.error('Could not get user media', error);
+      }
+    }
+  }
+
+  async function handleNewPeer(peerId) {
+    const peerConnection = await createPeerConnection(peerId);
+    localStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream);
+    });
+
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('webrtc_offer', {
+      type: 'webrtc_offer',
+      sdp: offer,
+      roomId,
+      peerId,
+    });
+  }
+
+  async function setupPeerConnection(peerId, isInitiator) {
+    const peerConnection = new RTCPeerConnection(iceServers);
+
+    if (localStream) {
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    } else {
+      console.error("Local stream is not defined in setupPeerConnection");
+      return;
+    }
+
+    peerConnection.ontrack = (event) => addRemoteStream(event.streams[0], peerId);
+    peerConnection.onicecandidate = (event) => handleIceEvent(event, peerId);
+
+    peerConnections[peerId] = peerConnection;
+
+    if (isInitiator) {
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      socket.emit('webrtc_offer', { roomId, sdp: offer, peerId });
+    }
+  }
+
+  function addRemoteStream(event, peerId) {
+    let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+    if (!remoteVideoElement) {
+      remoteVideoElement = createRemoteVideoElement(peerId);
+    }
+
+    let stream;
+    if (event.streams && event.streams.length > 0) {
+      // Use the stream from the event if it exists
+      stream = event.streams[0];
+    } else {
+      // Create a new stream and add the track to it
+      stream = new MediaStream();
+      if (event.track) {
+        stream.addTrack(event.track);
+      }
+    }
+
+    // Additional logging to debug
+    console.log(`Adding remote stream for peer ${peerId}`, stream);
+    if (stream.getTracks().length === 0) {
+      console.error('No tracks in the remote stream');
+    }
+
+    remoteVideoElement.srcObject = stream;
+    remoteVideoElement.muted = false; // Ensure remote video is not muted
+    remoteVideoElement.volume = 1; // Ensure volume is set to maximum
+  }
+
+  function createRemoteVideoElement(peerId) {
+    const remoteVideo = document.createElement('video');
+    remoteVideo.id = `remote-video-${peerId}`;
+    remoteVideo.autoplay = true;
+    remoteVideo.playsInline = true;
+    remoteVideo.classList.add('remote-video', ...tailwindClasses);
+
+    document.getElementById('remote-videos-container')
+          .appendChild(remoteVideo);
+    return remoteVideo;
+  }
+
+
+  async function handleIceEvent(event, peerId) {
+    if (event.candidate) {
+      socket.emit('webrtc_ice_candidate', {
+        roomId,
+        candidate: event.candidate,
+        peerId
+      });
+    }
+  }
+
+  async function createPeerConnection(peerId) {
+    const peerConnection = new RTCPeerConnection(iceServers);
+
+    \begin{verbatim}
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    \end{verbatim}
+      // localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    \end{verbatim}
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    // Gestion de l'ajout des streams distants
+    peerConnection.ontrack = (event) => addRemoteStream(event, peerId);
+
+    // Gestion de l'ajout des streams distants
+    peerConnection.ontrack = (event) => {
+    let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+    if (!remoteVideoElement) {
+      remoteVideoElement = document.createElement('video');
+      remoteVideoElement.id = `remote-video-${peerId}`;
+      remoteVideoElement.autoplay = true;
+      remoteVideoElement.playsInline = true;
+      remoteVideoElement.classList.add('remote-video');
+      document.getElementById('remote-videos-container')
+          .appendChild(remoteVideoElement);
+    }
+    remoteVideoElement.srcObject = event.streams[0];
   };
+
+
+    // Gestion des candidats ICE
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log(`Sending ICE candidate to peer ${peerId}`, event.candidate);
+        socket.emit('webrtc_ice_candidate', {
+          type: 'webrtc_ice_candidate',
+          candidate: event.candidate,
+          roomId,
+          peerId,
+        });
+      }
+    };
+
+    peerConnections[peerId] = peerConnection;
+
+    \usepackage{lastpage}
+    if (!isRoomCreator) {
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      socket.emit('webrtc_offer', {
+        type: 'webrtc_offer',
+        sdp: offer,
+        roomId,
+        peerId,
+      });
+    }
+  }
+
+
+  async function handleOffer(data) {
+    try {
+      if (!peerConnections[data.peerId]) {
+        await createPeerConnection(data.peerId);
+      }
+
+      const peerConnection = peerConnections[data.peerId];
+      console.log(\texttt{\'{E}tat} de la connexion Peer avant setRemoteDescription: $\backslash$texttt{${peerConnection.signalingState}}$`);
+
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+
+      // Process cached ICE candidates
+      if (peerConnection.cachedIceCandidates) {
+        peerConnection.cachedIceCandidates.forEach(cachedCandidate => {
+          peerConnection.addIceCandidate(new RTCIceCandidate(cachedCandidate));
+        });
+        peerConnection.cachedIceCandidates = [];
+      }
+
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+
+      socket.emit('webrtc_answer', {
+        type: 'webrtc_answer',
+        sdp: answer,
+        roomId,
+        peerId: data.peerId,
+      });
+    } catch (error) {
+      console.error(`Erreur dans handleOffer pour le pair ${data.peerId}:`, error);
+    }
+  }
+
+  async function handleAnswer(data) {
+    const peerConnection = peerConnections[data.peerId];
+    console.log(`Peer connection state before setting remote description: ${peerConnection.signalingState}`);
+
+    if (peerConnection.signalingState === 'have-local-offer') {
+      try {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        console.log(`Remote description set for peer ${data.peerId}`);
+      } catch (error) {
+        console.error(`Error in handleAnswer for peer ${data.peerId}:`, error);
+      }
+    } else {
+      console.log(`Peer connection not in the correct state to set remote description, current state: ${peerConnection.signalingState}`);
+    }
+  }
+
+
+  async function handleIceCandidate(data) {
+    const peerConnection = peerConnections[data.peerId];
+    if (peerConnection) {
+      if (!peerConnection.remoteDescription) {
+        console.log("Queueing ICE candidate as remote description is not yet set");
+        if (!peerConnection.cachedIceCandidates) {
+          peerConnection.cachedIceCandidates = [];
+        }
+        peerConnection.cachedIceCandidates.push(data.candidate);
+      } else {
+        console.log("Adding ICE candidate");
+        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+      }
+    }
+  }
+
+
+
+  function handleNewICECandidateMsg(data) {
+    const peerConnection = peerConnections[data.peerId];
+    peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+  }
+
+  function sendIceCandidate(candidate, peerId) {
+    socket.emit('webrtc_ice_candidate', {
+      roomId,
+      candidate,
+      peerId,
+    });
+  }
+
+  function addVideoStream(videoElement, stream, isLocal = false) {
+    \texttt{console.log('Adding videoElement.srcObject = stream;')}
+    videoElement.srcObject = stream;
+    videoElement.autoplay = true;
+    videoElement.playsInline = true;
+    videoElement.muted = isLocal;
+    if (isLocal) {
+      videoElement.id = 'local-video';
+      videoElement.style.backgroundColor = 'red'; 
+    } else {
+      videoElement.classList.add('remote-video');
+      videoElement.style.backgroundColor = 'green'; 
+    }
+    videoChatContainer.appendChild(videoElement);
+  }
+
+  function handleRemoteStreamAdded(stream, peerId) {
+    console.log(`handleRemoteStreamAdded called with peerId: ${peerId}`);
+    let videoElementId = `remote-video-${peerId}`;
+    let remoteVideoElement = document.getElementById(videoElementId);
+    
+    if (!remoteVideoElement) {
+      console.log(`Creating new video element for peer ${peerId}`);
+      remoteVideoElement = document.createElement('video');
+      remoteVideoElement.id = videoElementId;
+      remoteVideoElement.autoplay = true;
+      remoteVideoElement.playsInline = true;
+      remoteVideoElement.classList.add('remote-video');
+      document.getElementById('remote-videos-container')
+            .appendChild(remoteVideoElement);
+    }
+    else {
+      console.log(`Replacing video element for peer ${peerId}`);
+    }
+
+    remoteVideoElement.srcObject = stream;
+  }
+
+
+
+  function hangUpCall() {
+    console.log("Hang Up Call");
+    for (let peerId in peerConnections) {
+      peerConnections[peerId].close();
+      delete peerConnections[peerId];
+    }
+
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      localStream = null;
+    }
+
+    let remoteVideosContainer = document.getElementById('remote-videos-container');
+    while (remoteVideosContainer.firstChild) {
+      remoteVideosContainer.removeChild(remoteVideosContainer.firstChild);
+    }
+
+    const waitingText = document.getElementById('waitingText');
+    if (waitingText) {
+      waitingText.style.display = 'block';
+    }
+
+    videoChatContainer.style.display = 'none';
+
+    roomSelectionContainer.style.display = 'none';
+  }
+
+
+  function toggleMicrophone() {
+    const audioTrack = localStream.getAudioTracks()[0];
+    if (audioTrack) {
+      audioTrack.enabled = !audioTrack.enabled;
+      console.log("Microphone toggled. Now enabled:", audioTrack.enabled);
+
+      // Update the track on all peer connections
+      for (let peerId in peerConnections) {
+        const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === audioTrack.kind);
+        if (sender) {
+          sender.replaceTrack(audioTrack);
+        }
+      }
+    }
+  }
+
+
+  function toggleCamera() {
+    const videoTrack = localStream.getVideoTracks()[0];
+    if (videoTrack) {
+      videoTrack.enabled = !videoTrack.enabled;
+      console.log("Camera toggled. Now enabled:", videoTrack.enabled);
+
+      // Update the track on all peer connections
+      for (let peerId in peerConnections) {
+        const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === videoTrack.kind);
+        if (sender) {
+          sender.replaceTrack(videoTrack);
+        }
+      }
+    }
+  }
 \end{lstlisting}
 
 \begin{itemize}
-  \item \verb|socket| : Crée une connexion socket.io pour la communication en temps réel avec le serveur.
-  \item \verb|mediaConstraints| : Spécifie les contraintes des médias (audio et vidéo) pour WebRTC.
-  \item \verb|localStream| : Représente le flux média local (audio et vidéo) de l'utilisateur.
-  \item \verb|roomId| : Stocke l'ID de la salle de chat actuelle.
-  \item \verb|peerConnections| : Un dictionnaire pour stocker les connexions peer WebRTC.
-  \item \verb|iceServers| : Contient les serveurs STUN et TURN utilisés pour la traversée de NAT et le relais.
-    \subitem Pour obtenir un serveur TURN gratuitement et rapidement, nous avons utilisé le service ExpressTURN : \href{https://www.expressturn.com/}{https://www.expressturn.com/}. Il fournit un serveur TURN gratuit et public avec une limite de 500 MB par mois.\\
+  \item \verb|async function joinRoom(room)| : Rejoint une salle de chat en utilisant WebRTC.
+  \item \verb|function showVideoConference()| : Affiche l'interface de la vidéoconférence.
+  \item \verb|async function setLocalStream(mediaConstraints)| : Configure le flux média local.
+  \item \verb|async function handleNewPeer(peerId)| : Gère l'ajout d'un nouveau pair.
+  \item \verb|async function setupPeerConnection(peerId, isInitiator)| : Configure la connexion peer WebRTC.
+  \item \verb|function addRemoteStream(event, peerId)| : Ajoute un flux média distant à l'élément vidéo.
+  \item \verb|function createRemoteVideoElement(peerId)| : Crée un nouvel élément vidéo pour un pair distant.
+  \item \verb|async function handleIceEvent(event, peerId)| : Traite les événements de candidat ICE.
+  \item \verb|async function createPeerConnection(peerId)| : Crée une nouvelle connexion peer WebRTC.
+  \item \verb|async function handleOffer(data)| : Traite une offre WebRTC reçue.
+  \item \verb|async function handleAnswer(data)| : Traite une réponse WebRTC reçue.
+  \item \verb|async function handleIceCandidate(data)| : Traite un candidat ICE WebRTC reçu.
+  \item \verb|function handleNewICECandidateMsg(data)| : Ajoute un nouveau candidat ICE à la connexion peer.
+  \item \verb|function sendIceCandidate(candidate, peerId)| : Envoie un candidat ICE au serveur.
+  \item \verb|function addVideoStream(videoElement, stream, isLocal)| : Ajoute un flux vidéo à un élément vidéo.
+  \item \verb|function handleRemoteStreamAdded(stream, peerId)| : Gère l'ajout d'un flux média distant.
+  \item \verb|function hangUpCall()| : Gère la fin d'un appel.
+  \item \verb|function toggleMicrophone()| : Active ou désactive le microphone.
+  \item \verb|function toggleCamera()| : Active ou désactive la caméra.
 \end{itemize}
 
 \newpage
-
-\subsection{title}
-
-\begin{lstlisting}[language=JavaScript, caption={Variables}, label=Variables]
-  const socket = io();
-  const mediaConstraints = { audio: true, video: { width: 1280, height: 720 } };
-  let localStream;
-  let roomId;
-  let peerConnections = {}; // Dictionary to hold all peer connections
-  
-  const iceServers = {
-      iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' }, // Serveur STUN existant
-          // Ajout de la configuration TURN
-          {
-              urls: 'turn:relay1.expressturn.com:3478', // URL du serveur TURN
-              username: 'efJJ0L80U0GANH5V0A', // Nom d'utilisateur
-              credential: 'LO5Tdr8aoKohTHDL' // Mot de passe
-          }
-      ]
-  };
-\end{lstlisting}
-
-\begin{itemize}
-  \item \verb|socket| : Crée une connexion socket.io pour la communication en temps réel avec le serveur.
-  \item \verb|mediaConstraints| : Spécifie les contraintes des médias (audio et vidéo) pour WebRTC.
-  \item \verb|localStream| : Représente le flux média local (audio et vidéo) de l'utilisateur.
-  \item \verb|roomId| : Stocke l'ID de la salle de chat actuelle.
-  \item \verb|peerConnections| : Un dictionnaire pour stocker les connexions peer WebRTC.
-  \item \verb|iceServers| : Contient les serveurs STUN et TURN utilisés pour la traversée de NAT et le relais.
-\end{itemize}
-
-\newpage
-
-\subsection{title}
-
-\subsection{title}
-
-\subsection{title}
-
-\subsection{title}
 
 \newpage
 
