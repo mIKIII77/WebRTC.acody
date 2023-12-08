@@ -17,11 +17,19 @@ app.get('*', ssrHandler);
 const server = createServer(app);
 const io = new SocketIOServer(server);
 
+let messages = [];
+
 // Socket.io event handling
 io.on('connection', (socket) => {
   console.log('A user connected: ' + socket.id);
 
+  messages.forEach((message) => {
+    socket.emit('chat_message', message);
+  });
+
   socket.on('chat_message', (data) => {
+    messages.push(data);
+    console.log('message: ' + data);
     // Diffusion du message à tous les clients connectés
     io.emit('chat_message', data);
   });
