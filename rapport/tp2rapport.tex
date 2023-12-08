@@ -854,9 +854,56 @@ Au cours de cette analyse, nous examinerons la conception visuelle, la facilité
 
 
 
+\newpage
 
+\section{Installation de l'application}
 
+\subsection{Installation en dur}
 
+ATTENTION : au préalable, il faut installer NodeJS et NPM sur la machine !\\
+
+Pour installer l'application en dur, il suffit de cloner le dépôt git suivant : \url{}{}.\\
+
+Ensuite, il faut naviger dans le dossier \verb|SAE5.ROM.03/webssr| et lancer la commande \verb|npm install| pour installer les dépendances.\\
+Enfin, il faut lancer la commande \verb|npm run build| puis \verb|node ./run-server.mjs| pour lancer l'application.\\
+
+\subsection{Installation en Docker}
+
+ATTENTION : au préalable, il faut installer Docker sur la machine !\\
+
+Pour installer l'application en Docker, il suffit de cloner le dépôt git suivant : \url{}{}.\\
+
+Ensuite, il faut naviger dans le dossier \verb|SAE5.ROM.03/docker| et lancer la commande \verb|docker build -t nom-de-votre-application| pour construire l'image Docker.\\
+
+Enfin, il faut lancer la commande \verb|docker run -p 3000:3000 nom-de-votre-application| pour lancer l'application.\\
+
+\newpage
+
+\section{Bugs}
+
+\subsection{Bugs connus}
+
+Nous avons pu détecter 2 bugs dans notre application.\\
+
+\subsubsection{Premier bug}
+
+Lors de certains appels, il arrive que la connexion se fasse mal et que un des interlocuteurs ne voit pas l'autre. Voici plusieurs façon de résolver ce problème :\\
+
+\begin{itemize}
+  \item 1 : Il faut recliquer sur le bouton "Rejoindre la réunion"
+  \item 2 : Si le problème persiste, Recharger la page
+  \item 3 : Si le problème persiste toujours, il faut quitter la salle et en rejoindre une nouvelle
+\end{itemize}
+
+\subsubsection{Deuxième bug}
+
+Au moment de raccrocher l'appel, il se peut la vidéo de l'autre interlocuteur reste affichée. Pour résoudre ce problème, il faut rafraichir la page.\\
+
+\subsection{Bugs inconnus}
+
+Si vous rencontrez d'autres bugs, merci de nous les signaler à l'adresse suivante : \url{mailto:contact@louispluviose.fr}{contact@louispluviose.fr}.
+
+\newpage
 
 \section{Annexes}
 
@@ -873,5 +920,17 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse auctor elit
 	
 	hello("World")
 \end{lstlisting}
+
+\newpage
+
+\section{Conclusion}
+
+Ce projet a représenté un défi stimulant et enrichissant pour notre groupe. L'opportunité d'explorer et de maîtriser la technologie WebRTC a marqué une étape importante dans notre parcours de développement. La création d'une application de communication en temps réel nous a permis non seulement d'approfondir nos compétences en Docker et NodeJS, mais aussi de comprendre les subtilités de la communication en ligne moderne.\\
+
+Bien que nous ayons nourri l'ambition d'intégrer des fonctionnalités supplémentaires telles que le partage d'écran, un tableau blanc interactif, la gestion de contacts, la création de comptes utilisateurs, et même la liaison avec un serveur Asterisk, le temps imparti n'a pas suffi pour réaliser toutes ces idées. Cependant, cette limitation n'a en rien diminué notre fierté face aux accomplissements réalisés. Nous avons réussi à créer une application fonctionnelle et intuitive, dotée de fonctionnalités de base efficaces et faciles à utiliser.\\
+
+Ce sentiment d'accomplissement est renforcé par notre engagement à poursuivre le développement de ce projet. Notre vision à long terme est de le rendre plus complet, plus performant et de le transformer en un produit open source. En continuant à travailler sur ce projet, nous espérons non seulement enrichir notre propre expérience, mais également contribuer à la communauté en offrant une solution de communication avancée et accessible à tous.\\
+
+En somme, ce projet est plus qu'une simple réalisation technique ; il représente notre passion pour l'innovation et notre désir de repousser les limites de ce qui est possible dans le domaine de la communication numérique. Nous sommes impatients de voir où ce chemin nous mènera et sommes déterminés à faire de ce projet une référence dans le monde de la communication WebRTC.\\
 
 \end{document}
