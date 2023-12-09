@@ -13,8 +13,13 @@
 \usepackage{pdflscape}
 \usepackage{hyperref}
 
+
 \usepackage{geometry}
 \geometry{hmargin=2.5cm,vmargin=1.5cm}
+
+\newcommand{\subsubsubsection}[1]{\paragraph{#1}\mbox{}\par}
+\setcounter{secnumdepth}{4} % Allows numbering up to four levels
+
 
 \newdateformat{mydate}{\THEDAY\space\monthname[\THEMONTH]\space\THEYEAR}
 
@@ -282,557 +287,251 @@ L'accent est mis sur la facilité d'utilisation. Les utilisateurs peuvent créer
 
 \newpage
 
-\section{Fonctionnement de l'application}
+\section{Fonctionnement de l'application de réunion}
+
+Le code relatif à l'application est disponnible sur GitHub à l'adresse suivante : et en annexe de ce document.
 
 \subsection{DOM Elements}
 
-Cette section récupère et stocke des références à divers éléments du DOM qui seront manipulés ou utilisés tout au long du script.\\
+\begin{itemize}
+  \item \verb|const roomSelectionContainer = document.getElementById('room-selection-container');| : Cette ligne crée une constante roomSelectionContainer et lui attribue l'élément DOM (Document Object Model) dont l'identifiant (ID) est 'room-selection-container'. L'élément récupéré est un conteneur dans le code HTML où les utilisateurs peuvent sélectionner ou entrer des informations pour rejoindre une salle de chat vidéo.
+  \item \verb|const roomInput = document.getElementById('room-input');| : cette ligne crée une constante roomInput qui référence l'élément DOM avec l'ID 'room-input'. Cet élément est un champ de saisie où les utilisateurs peuvent entrer le nom ou le numéro de la salle qu'ils souhaitent rejoindre.
+  \item \verb|const connectButton = document.getElementById('connect-button');| :  Cette ligne crée une constante connectButton qui référence un élément DOM, probablement un bouton, avec l'ID 'connect-button'. Ce bouton est utilisé pour initier la connexion à la salle de chat vidéo après que l'utilisateur a saisi les informations nécessaires.
+  \item \verb|const videoChatContainer = document.getElementById('video-chat-container');| : videoChatContainer est défini comme référençant l'élément DOM avec l'ID 'video-chat-container'. Cet élément est le conteneur principal où la vidéo du chat et d'autres éléments d'interface liés au chat vidéo seront affichés une fois la connexion établie.
+  \item \verb|const localVideoComponent = document.getElementById('local-video');| :  cette ligne définit localVideoComponent comme une référence à l'élément DOM avec l'ID 'local-video'. Cet élément est utilisé pour afficher la vidéo locale de l'utilisateur, c'est-à-dire, la vidéo capturée par la caméra de l'appareil de l'utilisateur.
+\end{itemize}
 
-\begin{lstlisting}[language=JavaScript, caption={DOM Elements}, label=DOM Elements]
-  const roomSelectionContainer = document.getElementById('room-selection-container');
-  const roomInput = document.getElementById('room-input');
-  const connectButton = document.getElementById('connect-button');
-  const videoChatContainer = document.getElementById('video-chat-container');
-  const localVideoComponent = document.getElementById('local-video');
-\end{lstlisting}
+\vspace{0.5cm}
 
+En résumé, ce code initialise des constantes pour référencer divers éléments d'une interface de chat vidéo, probablement définis dans le HTML. Ces références sont ensuite utilisées dans d'autres parties du code JavaScript pour gérer la logique de connexion à une salle de chat vidéo et pour contrôler l'affichage et la mise à jour de l'interface utilisateur en fonction des actions de l'utilisateur.
 \newpage
 
 \subsection{Variables}
 
-\begin{lstlisting}[language=JavaScript, caption={Variables}, label=Variables]
-  const socket = io();
-  const mediaConstraints = { audio: true, video: { width: 1280, height: 720 } };
-  let localStream;
-  let roomId;
-  let peerConnections = {}; // Dictionary to hold all peer connections
-  
-  const iceServers = {
-      iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' }, // Serveur STUN existant
-          // Ajout de la configuration TURN
-          {
-              urls: 'turn:relay1.expressturn.com:3478', // URL du serveur TURN
-              username: 'efJJ0L80U0GANH5V0A', // Nom d'utilisateur
-              credential: 'LO5Tdr8aoKohTHDL' // Mot de passe
-          }
-      ]
-  };
-\end{lstlisting}
-
 \begin{itemize}
-  \item \verb|socket| : Crée une connexion socket.io pour la communication en temps réel avec le serveur.
-  \item \verb|mediaConstraints| : Spécifie les contraintes des médias (audio et vidéo) pour WebRTC.
-  \item \verb|localStream| : Représente le flux média local (audio et vidéo) de l'utilisateur.
-  \item \verb|roomId| : Stocke l'ID de la salle de chat actuelle.
-  \item \verb|peerConnections| : Un dictionnaire pour stocker les connexions peer WebRTC.
-  \item \verb|iceServers| : Contient les serveurs STUN et TURN utilisés pour la traversée de NAT et le relais.
+  \item \verb|const socket = io();| : Cette ligne crée une variable socket en utilisant io(), qui est une fonction de la bibliothèque Socket.IO. Socket.IO est une bibliothèque JavaScript pour les applications web en temps réel qui permet une communication bidirectionnelle en temps réel entre les navigateurs web et les serveurs. socket serait utilisé pour gérer les communications en temps réel, comme envoyer et recevoir des signaux pour établir des connexions vidéo.
+  \item \verb|const mediaConstraints = { audio: true, video: { width: 1280, height: 720 } };| : Cette ligne définit les contraintes pour les médias qui seront utilisés dans la communication. Ici, audio: true signifie que l'audio sera activé, et video: { width: 1280, height: 720 } définit la résolution de la vidéo à 1280x720 pixels.
+  \item \verb|let localStream;| : Déclaration d'une variable localStream. Cette variable sera utilisée plus tard pour stocker le flux de médias local (audio et vidéo) de l'utilisateur.
+  \item \verb|let roomId;| : Déclaration d'une variable roomId qui sera utilisée pour stocker l'identifiant de la salle de chat vidéo à laquelle l'utilisateur se connecte.
+  \item \verb|let peerConnections = {};| : Cette ligne initialise un objet JavaScript peerConnections comme un dictionnaire vide. Ce dictionnaire sera utilisé pour stocker toutes les connexions peer-to-peer (P2P) établies durant la session de chat vidéo. Chaque connexion P2P représente une connexion directe à un autre utilisateur dans le chat vidéo.
+  \item \verb|const iceServers = { ... };| : Cette partie définit un objet iceServers qui contient la configuration des serveurs ICE (Interactive Connectivity Establishment). ICE est utilisé dans les applications WebRTC pour faciliter la connexion entre les pairs à travers différents types de réseaux et de pare-feu/NAT.
+  \subitem À l'intérieur de cet objet, deux types de serveurs sont configurés :
+  \subsubitem Un serveur STUN (stun:stun.l.google.com:19302), qui aide à découvrir l'adresse IP publique de l'utilisateur.
+  \subsubitem Un serveur TURN (turn:relay1.expressturn.com:3478 avec un nom d'utilisateur et un mot de passe), qui est utilisé pour relayer le trafic si une connexion P2P directe n'est pas possible.
 \end{itemize}
+
+\vspace{0.5cm}
+
+En résumé, Ce code initialise des variables clés pour la gestion de la communication en temps réel et du streaming vidéo. Il crée une connexion Socket.IO, définit les contraintes des médias (audio et vidéo), prépare des variables pour stocker le flux local et l'ID de la salle, et configure un dictionnaire pour gérer les connexions peer-to-peer. Il définit également des serveurs ICE pour aider à la connectivité réseau dans WebRTC.
 
 \newpage
 
 \subsection{Button Listeners}
 
-\begin{lstlisting}[language=JavaScript, caption={Button Listeners}, label=Button Listeners]
-  connectButton.addEventListener('click', () => {
-  joinRoom(roomInput.value);
-});
-
-const hangUpButton = document.getElementById('hangup-button');
-const toggleMicButton = document.getElementById('toggle-mic-button');
-const toggleCameraButton = document.getElementById('toggle-camera-button');
-
-hangUpButton.addEventListener('click', hangUpCall);
-toggleMicButton.addEventListener('click', toggleMicrophone);
-toggleCameraButton.addEventListener('click', toggleCamera);
-
-let isRoomCreator = false;
-\end{lstlisting}
-
 \begin{itemize}
-  \item \verb|connectButton.addEventListener| : Écouteur d'événements pour le bouton de connexion pour rejoindre une salle.
-  \item \verb|hangUpButton.addEventListener| : Écouteur d'événements pour le bouton de raccrochage.
-  \item \verb|toggleMicButton.addEventListener| :  Écouteur d'événements pour activer/désactiver le microphone.
-  \item \verb|toggleCameraButton.addEventListener| : Écouteur d'événements pour activer/désactiver la caméra.
+  \item \verb|connectButton.addEventListener('click', () => { joinRoom(roomInput.value); });| : Cette ligne attache un écouteur d'événement au bouton connectButton. Lorsque ce bouton est cliqué, la fonction anonyme déclenche l'appel de la fonction joinRoom avec la valeur actuelle de l'élément roomInput comme argument. joinRoom est une fonction qui gère la logique pour rejoindre une salle de chat vidéo spécifique basée sur l'identifiant de la salle fourni.
+  \item \verb|Déclarations des boutons hangUpButton, toggleMicButton et toggleCameraButton| : Ces lignes récupèrent des références à trois boutons de l'interface utilisateur : un pour raccrocher l'appel, un pour activer/désactiver le microphone, et un pour activer/désactiver la caméra.
+  \item \verb|Ajout de gestionnaires d'événements pour les boutons| : 
+  \subitem \verb|hangUpButton.addEventListener('click', hangUpCall);| : ajoute un gestionnaire d'événement pour gérer l'action de raccrocher l'appel.
+  \subitem \verb|toggleMicButton.addEventListener('click', toggleMicrophone);| : ajoute un gestionnaire pour activer ou désactiver le microphone.
+  \subitem \verb|toggleCameraButton.addEventListener('click', toggleCamera);| : ajoute un gestionnaire pour activer ou désactiver la caméra.
+  \item \verb|let isRoomCreator = false;| : Cette ligne déclare une variable isRoomCreator et l'initialise à false. Cette variable est utilisée pour suivre si l'utilisateur actuel est celui qui a créé la salle de chat vidéo. Cela peut affecter la logique de l'application, comme qui a le droit de contrôler certaines fonctionnalités de la salle ou d'inviter d'autres utilisateurs.
 \end{itemize}
+\vspace{0.5cm}
+
+En résumé, Dans cet extrait, des écouteurs d'événements sont ajoutés à divers boutons de l'interface utilisateur. Ces boutons permettent de rejoindre une salle de chat vidéo, de raccrocher l'appel, d'activer/désactiver le microphone, et d'activer/désactiver la caméra. Une variable isRoomCreator est également définie pour suivre si l'utilisateur est le créateur de la salle.
 
 \newpage
 
 \subsection{Socket Event Callbacks}
 
-\begin{lstlisting}[language=JavaScript, caption={Socket Event Callbacks}, label=Socket Event Callbacks]
-  socket.on('room_created', async () => {
-  console.log('Socket event callback: room_created');
-  await setLocalStream(mediaConstraints);
-  isRoomCreator = true;
-});
-
-socket.on('room_joined', async () => {
-  console.log('Socket event callback: room_joined');
-  await setLocalStream(mediaConstraints);
-  isRoomCreator = false;
-  socket.emit('start_call', roomId);
-}); 
-
-socket.on('full_room', () => {
-  console.log('Socket event callback: full_room');
-  alert('The room is full, please try another one');
-});
-
-socket.on('start_call', async () => {
-  console.log('Socket event callback: start_call');
-  if (isRoomCreator) {
-    createPeerConnections();
-  }
-});
-
-socket.on('webrtc_offer', async (data) => {
-  console.log('Socket event callback: webrtc_offer');
-  
-  if (!localStream) {
-    console.log("Waiting to set local stream before handling offer");
-    await setLocalStream(mediaConstraints);
-  }
-  
-  if (!peerConnections[data.peerId]) {
-    await setupPeerConnection(data.peerId, false); // false = not an initiator
-  }
-  await handleOffer(data);
-});
-
-socket.on('webrtc_answer', (data) => {
-  console.log('Socket event callback: webrtc_answer');
-  handleAnswer(data);
-});
-
-socket.on('webrtc_ice_candidate', (data) => {
-  console.log('Socket event callback: webrtc_ice_candidate');
-  handleIceCandidate(data);
-});
-
-socket.on('new_peer', async (peerId) => {
-  console.log('Socket event callback: new_peer');
-  await createPeerConnection(peerId, false);
-});
-\end{lstlisting}
-
 \begin{itemize}
-  \item \verb|socket.on('room_created')| : Gère l'événement de création de salle.
-  \item \verb|socket.on('room_joined')| : Gère l'événement de rejoindre une salle.
-  \item \verb|socket.on('full_room')| : Gère l'événement lorsque la salle est pleine.
-  \item \verb|socket.on('start_call')| : Gère le début d'un appel WebRTC.
-  \item \verb|socket.on('webrtc_offer')| : Gère la réception d'une offre WebRTC.
-  \item \verb|socket.on('webrtc_answer')| : Gère la réception d'une réponse WebRTC.
-  \item \verb|socket.on('webrtc_ice_candidate')| : Gère la réception d'un candidat ICE.
-  \item \verb|socket.on('new_peer')| : Gère l'ajout d'un nouveau pair dans la salle.
+  \item \verb|socket.on('room_created', async () => { ... });| : Quand le serveur envoie un message room\_created, cela signifie que l'utilisateur a créé une nouvelle salle. Le flux vidéo local est configuré et isRoomCreator est défini sur true.
+  \item \verb|socket.on('room_joined', async () => { ... });| : Ce gestionnaire réagit au message room\_joined, indiquant que l'utilisateur a rejoint une salle existante. Le flux local est configuré, isRoomCreator est défini sur false, et un message start\_call est émis pour commencer l'appel.
+  \item \verb|socket.on('full_room', () => { ... });| : Réagit au message full\_room, indiquant que la salle que l'utilisateur tente de rejoindre est pleine. Affiche une alerte pour informer l'utilisateur.
+  \item \verb|socket.on('start_call', async () => { ... });| : Lors de la réception d'un message start\_call, si l'utilisateur est le créateur de la salle, il initie les connexions Peer-to-Peer (P2P) avec les autres participants.
+  \item \verb|socket.on('webrtc_offer', async (data) => { ... });| : Gère les offres WebRTC reçues d'autres pairs. Si le flux local n'est pas encore configuré, il le fait, puis traite l'offre WebRTC.
+  \item \verb|socket.on('webrtc_answer', (data) => { ... });| : Gère les réponses WebRTC reçues en réponse à une offre envoyée précédemment.
+  \item \verb|socket.on('webrtc_ice_candidate', (data) => { ... });| : Gère les messages de candidats ICE, qui sont des informations nécessaires pour établir la connectivité réseau dans WebRTC.  
+  \item \verb|socket.on('new_peer', async (peerId) => { ... });| : Réagit à un message indiquant qu'un nouveau pair a rejoint la salle, et initie la configuration d'une connexion P2P avec ce nouveau pair. 
 \end{itemize}
+
+\vspace{0.5cm}
+
+En résumé, cet extrait définit plusieurs gestionnaires d'événements pour gérer les communications via Socket.IO dans notre application de chat vidéo WebRTC. Ces événements incluent la création et la jonction à des salles, la gestion de salles pleines, le démarrage d'appels, et la gestion des offres, réponses, et candidats ICE de WebRTC, ainsi que la gestion de l'arrivée de nouveaux pairs.
 
 \newpage
 
 \subsection{Fonctions Principales}
 
-\begin{lstlisting}[language=JavaScript, caption={Fonctions Principales}, label=Fonctions Principales]
-    async function joinRoom(room) {
-    if (room === '') {
-      alert('Please type a room ID');
-    } else {
-      roomId = room;
-      socket.emit('join', room);
-      showVideoConference();
-      
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-        document.getElementById('local-video').srcObject = localStream;
-      } catch (error) {
-        console.error('Could not get user media', error);
-      }
-    }
-  }
-
-  function showVideoConference() {
-    roomSelectionContainer.style = 'display: none';
-    videoChatContainer.style = 'display: block';
-
-    // Masquer le texte d'attente
-    const waitingText = document.getElementById('waitingText');
-    if (waitingText) {
-      waitingText.style.display = 'none';
-    }
-  }
-
-
-  async function setLocalStream(mediaConstraints) {
-    if (!localStream) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-        console.log('Local stream obtained', stream);
-        localStream = stream;
-        const localVideoComponent = document.getElementById('local-video');
-        if (localVideoComponent) {
-          localVideoComponent.srcObject = stream;
-        } else {
-          console.error('The local video element was not found in the DOM.');
-        }
-      } catch (error) {
-        console.error('Could not get user media', error);
-      }
-    }
-  }
-
-  async function handleNewPeer(peerId) {
-    const peerConnection = await createPeerConnection(peerId);
-    localStream.getTracks().forEach(track => {
-      peerConnection.addTrack(track, localStream);
-    });
-
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-    socket.emit('webrtc_offer', {
-      type: 'webrtc_offer',
-      sdp: offer,
-      roomId,
-      peerId,
-    });
-  }
-
-  async function setupPeerConnection(peerId, isInitiator) {
-    const peerConnection = new RTCPeerConnection(iceServers);
-
-    if (localStream) {
-      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-    } else {
-      console.error("Local stream is not defined in setupPeerConnection");
-      return;
-    }
-
-    peerConnection.ontrack = (event) => addRemoteStream(event.streams[0], peerId);
-    peerConnection.onicecandidate = (event) => handleIceEvent(event, peerId);
-
-    peerConnections[peerId] = peerConnection;
-
-    if (isInitiator) {
-      const offer = await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
-      socket.emit('webrtc_offer', { roomId, sdp: offer, peerId });
-    }
-  }
-
-  function addRemoteStream(event, peerId) {
-    let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
-    if (!remoteVideoElement) {
-      remoteVideoElement = createRemoteVideoElement(peerId);
-    }
-
-    let stream;
-    if (event.streams && event.streams.length > 0) {
-      // Use the stream from the event if it exists
-      stream = event.streams[0];
-    } else {
-      // Create a new stream and add the track to it
-      stream = new MediaStream();
-      if (event.track) {
-        stream.addTrack(event.track);
-      }
-    }
-
-    // Additional logging to debug
-    console.log(`Adding remote stream for peer ${peerId}`, stream);
-    if (stream.getTracks().length === 0) {
-      console.error('No tracks in the remote stream');
-    }
-
-    remoteVideoElement.srcObject = stream;
-    remoteVideoElement.muted = false; // Ensure remote video is not muted
-    remoteVideoElement.volume = 1; // Ensure volume is set to maximum
-  }
-
-  function createRemoteVideoElement(peerId) {
-    const remoteVideo = document.createElement('video');
-    remoteVideo.id = `remote-video-${peerId}`;
-    remoteVideo.autoplay = true;
-    remoteVideo.playsInline = true;
-    remoteVideo.classList.add('remote-video', ...tailwindClasses);
-
-    document.getElementById('remote-videos-container')
-          .appendChild(remoteVideo);
-    return remoteVideo;
-  }
-
-
-  async function handleIceEvent(event, peerId) {
-    if (event.candidate) {
-      socket.emit('webrtc_ice_candidate', {
-        roomId,
-        candidate: event.candidate,
-        peerId
-      });
-    }
-  }
-
-  async function createPeerConnection(peerId) {
-    const peerConnection = new RTCPeerConnection(iceServers);
-
-    \begin{verbatim}
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-    \end{verbatim}
-      // localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-    \end{verbatim}
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-    // Gestion de l'ajout des streams distants
-    peerConnection.ontrack = (event) => addRemoteStream(event, peerId);
-
-    // Gestion de l'ajout des streams distants
-    peerConnection.ontrack = (event) => {
-    let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
-    if (!remoteVideoElement) {
-      remoteVideoElement = document.createElement('video');
-      remoteVideoElement.id = `remote-video-${peerId}`;
-      remoteVideoElement.autoplay = true;
-      remoteVideoElement.playsInline = true;
-      remoteVideoElement.classList.add('remote-video');
-      document.getElementById('remote-videos-container')
-          .appendChild(remoteVideoElement);
-    }
-    remoteVideoElement.srcObject = event.streams[0];
-  };
-
-
-    // Gestion des candidats ICE
-    peerConnection.onicecandidate = (event) => {
-      if (event.candidate) {
-        console.log(`Sending ICE candidate to peer ${peerId}`, event.candidate);
-        socket.emit('webrtc_ice_candidate', {
-          type: 'webrtc_ice_candidate',
-          candidate: event.candidate,
-          roomId,
-          peerId,
-        });
-      }
-    };
-
-    peerConnections[peerId] = peerConnection;
-
-    \usepackage{lastpage}
-    if (!isRoomCreator) {
-      const offer = await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
-      socket.emit('webrtc_offer', {
-        type: 'webrtc_offer',
-        sdp: offer,
-        roomId,
-        peerId,
-      });
-    }
-  }
-
-
-  async function handleOffer(data) {
-    try {
-      if (!peerConnections[data.peerId]) {
-        await createPeerConnection(data.peerId);
-      }
-
-      const peerConnection = peerConnections[data.peerId];
-      console.log(\texttt{\'{E}tat} de la connexion Peer avant setRemoteDescription: $\backslash$texttt{${peerConnection.signalingState}}$`);
-
-      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-
-      // Process cached ICE candidates
-      if (peerConnection.cachedIceCandidates) {
-        peerConnection.cachedIceCandidates.forEach(cachedCandidate => {
-          peerConnection.addIceCandidate(new RTCIceCandidate(cachedCandidate));
-        });
-        peerConnection.cachedIceCandidates = [];
-      }
-
-      const answer = await peerConnection.createAnswer();
-      await peerConnection.setLocalDescription(answer);
-
-      socket.emit('webrtc_answer', {
-        type: 'webrtc_answer',
-        sdp: answer,
-        roomId,
-        peerId: data.peerId,
-      });
-    } catch (error) {
-      console.error(`Erreur dans handleOffer pour le pair ${data.peerId}:`, error);
-    }
-  }
-
-  async function handleAnswer(data) {
-    const peerConnection = peerConnections[data.peerId];
-    console.log(`Peer connection state before setting remote description: ${peerConnection.signalingState}`);
-
-    if (peerConnection.signalingState === 'have-local-offer') {
-      try {
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-        console.log(`Remote description set for peer ${data.peerId}`);
-      } catch (error) {
-        console.error(`Error in handleAnswer for peer ${data.peerId}:`, error);
-      }
-    } else {
-      console.log(`Peer connection not in the correct state to set remote description, current state: ${peerConnection.signalingState}`);
-    }
-  }
-
-
-  async function handleIceCandidate(data) {
-    const peerConnection = peerConnections[data.peerId];
-    if (peerConnection) {
-      if (!peerConnection.remoteDescription) {
-        console.log("Queueing ICE candidate as remote description is not yet set");
-        if (!peerConnection.cachedIceCandidates) {
-          peerConnection.cachedIceCandidates = [];
-        }
-        peerConnection.cachedIceCandidates.push(data.candidate);
-      } else {
-        console.log("Adding ICE candidate");
-        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-      }
-    }
-  }
-
-
-
-  function handleNewICECandidateMsg(data) {
-    const peerConnection = peerConnections[data.peerId];
-    peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-  }
-
-  function sendIceCandidate(candidate, peerId) {
-    socket.emit('webrtc_ice_candidate', {
-      roomId,
-      candidate,
-      peerId,
-    });
-  }
-
-  function addVideoStream(videoElement, stream, isLocal = false) {
-    \texttt{console.log('Adding videoElement.srcObject = stream;')}
-    videoElement.srcObject = stream;
-    videoElement.autoplay = true;
-    videoElement.playsInline = true;
-    videoElement.muted = isLocal;
-    if (isLocal) {
-      videoElement.id = 'local-video';
-      videoElement.style.backgroundColor = 'red'; 
-    } else {
-      videoElement.classList.add('remote-video');
-      videoElement.style.backgroundColor = 'green'; 
-    }
-    videoChatContainer.appendChild(videoElement);
-  }
-
-  function handleRemoteStreamAdded(stream, peerId) {
-    console.log(`handleRemoteStreamAdded called with peerId: ${peerId}`);
-    let videoElementId = `remote-video-${peerId}`;
-    let remoteVideoElement = document.getElementById(videoElementId);
-    
-    if (!remoteVideoElement) {
-      console.log(`Creating new video element for peer ${peerId}`);
-      remoteVideoElement = document.createElement('video');
-      remoteVideoElement.id = videoElementId;
-      remoteVideoElement.autoplay = true;
-      remoteVideoElement.playsInline = true;
-      remoteVideoElement.classList.add('remote-video');
-      document.getElementById('remote-videos-container')
-            .appendChild(remoteVideoElement);
-    }
-    else {
-      console.log(`Replacing video element for peer ${peerId}`);
-    }
-
-    remoteVideoElement.srcObject = stream;
-  }
-
-
-
-  function hangUpCall() {
-    console.log("Hang Up Call");
-    for (let peerId in peerConnections) {
-      peerConnections[peerId].close();
-      delete peerConnections[peerId];
-    }
-
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-      localStream = null;
-    }
-
-    let remoteVideosContainer = document.getElementById('remote-videos-container');
-    while (remoteVideosContainer.firstChild) {
-      remoteVideosContainer.removeChild(remoteVideosContainer.firstChild);
-    }
-
-    const waitingText = document.getElementById('waitingText');
-    if (waitingText) {
-      waitingText.style.display = 'block';
-    }
-
-    videoChatContainer.style.display = 'none';
-
-    roomSelectionContainer.style.display = 'none';
-  }
-
-
-  function toggleMicrophone() {
-    const audioTrack = localStream.getAudioTracks()[0];
-    if (audioTrack) {
-      audioTrack.enabled = !audioTrack.enabled;
-      console.log("Microphone toggled. Now enabled:", audioTrack.enabled);
-
-      // Update the track on all peer connections
-      for (let peerId in peerConnections) {
-        const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === audioTrack.kind);
-        if (sender) {
-          sender.replaceTrack(audioTrack);
-        }
-      }
-    }
-  }
-
-
-  function toggleCamera() {
-    const videoTrack = localStream.getVideoTracks()[0];
-    if (videoTrack) {
-      videoTrack.enabled = !videoTrack.enabled;
-      console.log("Camera toggled. Now enabled:", videoTrack.enabled);
-
-      // Update the track on all peer connections
-      for (let peerId in peerConnections) {
-        const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === videoTrack.kind);
-        if (sender) {
-          sender.replaceTrack(videoTrack);
-        }
-      }
-    }
-  }
-\end{lstlisting}
-
-\begin{itemize}
-  \item \verb|async function joinRoom(room)| : Rejoint une salle de chat en utilisant WebRTC.
-  \item \verb|function showVideoConference()| : Affiche l'interface de la vidéoconférence.
-  \item \verb|async function setLocalStream(mediaConstraints)| : Configure le flux média local.
-  \item \verb|async function handleNewPeer(peerId)| : Gère l'ajout d'un nouveau pair.
-  \item \verb|async function setupPeerConnection(peerId, isInitiator)| : Configure la connexion peer WebRTC.
-  \item \verb|function addRemoteStream(event, peerId)| : Ajoute un flux média distant à l'élément vidéo.
-  \item \verb|function createRemoteVideoElement(peerId)| : Crée un nouvel élément vidéo pour un pair distant.
-  \item \verb|async function handleIceEvent(event, peerId)| : Traite les événements de candidat ICE.
-  \item \verb|async function createPeerConnection(peerId)| : Crée une nouvelle connexion peer WebRTC.
-  \item \verb|async function handleOffer(data)| : Traite une offre WebRTC reçue.
-  \item \verb|async function handleAnswer(data)| : Traite une réponse WebRTC reçue.
-  \item \verb|async function handleIceCandidate(data)| : Traite un candidat ICE WebRTC reçu.
-  \item \verb|function handleNewICECandidateMsg(data)| : Ajoute un nouveau candidat ICE à la connexion peer.
-  \item \verb|function sendIceCandidate(candidate, peerId)| : Envoie un candidat ICE au serveur.
-  \item \verb|function addVideoStream(videoElement, stream, isLocal)| : Ajoute un flux vidéo à un élément vidéo.
-  \item \verb|function handleRemoteStreamAdded(stream, peerId)| : Gère l'ajout d'un flux média distant.
-  \item \verb|function hangUpCall()| : Gère la fin d'un appel.
-  \item \verb|function toggleMicrophone()| : Active ou désactive le microphone.
-  \item \verb|function toggleCamera()| : Active ou désactive la caméra.
-\end{itemize}
+\begin{enumerate}
+  \item \verb|joinRoom(room)|
+  \begin{itemize}
+    \item But : Afficher l'interface de la conférence vidéo.
+    \item Fonctionnement : Masque le conteneur de sélection de salle et affiche le conteneur de chat vidéo. Masque également le texte d'attente.
+  \end{itemize}
+  \item \verb|showVideoConference()|
+  \begin{itemize}
+    \item But : Afficher l'interface de la conférence vidéo.
+    \item Fonctionnement : Masque le conteneur de sélection de salle et affiche le conteneur de chat vidéo. Masque également le texte d'attente.
+  \end{itemize}
+  \item \verb|setLocalStream(mediaConstraints)|
+  \begin{itemize}
+    \item But : Configurer le flux de médias local.
+    \item Fonctionnement : Obtient le flux multimédia local selon les contraintes fournies et l'affecte à l'élément vidéo local.
+  \end{itemize}
+  \item \verb|handleNewPeer(peerId)|
+  \begin{itemize}
+    \item But : Gérer l'arrivée d'un nouveau pair.
+    \item Fonctionnement : Crée une connexion peer-to-peer avec le nouveau pair, ajoute le flux local à cette connexion, crée une offre WebRTC et l'envoie au pair via le socket.
+  \end{itemize}
+  \item \verb|setupPeerConnection(peerId, isInitiator)|
+  \begin{itemize}
+    \item But : Configurer une connexion peer-to-peer.
+    \item Fonctionnement : Crée une nouvelle connexion WebRTC avec les serveurs ICE configurés, ajoute des gestionnaires pour les événements track et icecandidate, et si l'utilisateur est l'initiateur, crée et envoie une offre WebRTC.
+  \end{itemize}
+  \item \verb|addRemoteStream(event, peerId)|
+  \begin{itemize}
+    \item But : Ajouter un flux distant à l'interface utilisateur.
+    \item Fonctionnement : Crée un nouvel élément vidéo pour le flux distant ou utilise un élément existant, puis associe le flux distant à cet élément vidéo.
+  \end{itemize}
+  \item \verb|handleIceEvent(event, peerId)|
+  \begin{itemize}
+    \item But : Traiter une offre WebRTC reçue.
+    \item Fonctionnement : Configure la description distante, gère les candidats ICE mis en cache, crée une réponse et l'envoie au pair.
+  \end{itemize}
+  \item \verb|handleAnswer(data)|
+  \begin{itemize}
+    \item But : Traiter une réponse WebRTC reçue.
+    \item Fonctionnement : Met à jour la description distante de la connexion peer-to-peer.
+  \end{itemize}
+  \item \verb|handleIceCandidate(data)|
+  \begin{itemize}
+    \item But : Gérer les candidats ICE reçus.
+    \item Fonctionnement : Ajoute les candidats ICE à la connexion peer-to-peer correspondante.
+  \end{itemize}
+  \item \verb|hangUpCall()|
+  \begin{itemize}
+    \item But : Terminer l'appel en cours.
+    \item Fonctionnement : Ferme toutes les connexions peer-to-peer, arrête le flux local et nettoie l'interface utilisateur.
+  \end{itemize}
+  \item \verb|toggleMicrophone()|
+  \begin{itemize}
+    \item But : Activer ou désactiver le microphone.
+    \item Fonctionnement : Bascule l'état d'activation de la piste audio du flux local.
+  \end{itemize}
+  \item \verb|toggleCamera()|
+  \begin{itemize}
+    \item But : Activer ou désactiver la caméra.
+    \item Fonctionnement : Bascule l'état d'activation de la piste vidéo du flux local.
+  \end{itemize}
+\end{enumerate}
 
 \newpage
+
+\section{Fonctionnement de l'application de messagerie}
+\subsection{Initialisation et Connexion Socket.IO}
+
+\begin{itemize}
+  \item \verb|Écouteur d'événement 'DOMContentLoaded| : Le code s'exécute une fois que le contenu de la page est complètement chargé.
+  \item \verb|Création d'une socket : const socket = io();| : initialise une connexion Socket.IO avec le serveur.
+  \item \verb|Génération d'un identifiant utilisateur : const userId = Date.now().toString();| : crée un identifiant unique pour chaque utilisateur en utilisant le timestamp actuel.
+  \item \verb|Connexion à Socket.IO| : L'écouteur socket.on('connect', ...) est déclenché lorsque le client est connecté au serveur Socket.IO.
+\end{itemize}
+\vspace{0.5cm}
+
+\subsection{Éléments de l'Interface Utilisateur}
+
+\begin{itemize}
+  \item \verb|Sélection des éléments DOM | : Les éléments pour le bouton d'envoi, la zone d'affichage des messages, le champ de saisie du nom d'utilisateur et le champ de saisie du message sont récupérés.
+\end{itemize}
+\vspace{0.5cm}
+
+\subsection{Envoi de Messages}
+
+\begin{itemize}
+  \item \verb|Écouteur d'événement pour le bouton d'envoi| : Lorsque le bouton d'envoi est cliqué, le nom d'utilisateur et le message sont récupérés.
+  \item \verb|Validation et envoi du message| : Si le message n'est pas vide, il est envoyé au serveur via socket.emit('chat\_message', { userId, username, message }).
+  \item \verb|Réinitialisation du champ de saisie du message| : Le champ de saisie du message est vidé après l'envoi du message.
+\end{itemize}
+\vspace{0.5cm}
+
+\subsection{Réception et Affichage de Messages}
+
+\begin{itemize}
+  \item \verb|Écouteur d'événement pour 'chat_message'| : Lorsqu'un message est reçu du serveur, il déclenche l'exécution du code suivant :
+  \item \verb|Création de conteneurs pour le message| : Un div pour contenir le message et un autre div pour le texte du message sont créés et stylisés.
+  \item \verb|Identification de l'expéditeur| : Un élément strong est utilisé pour afficher le nom de l'expéditeur en gras. Il affiche "Vous" si l'identifiant de l'expéditeur correspond à celui de l'utilisateur actuel, sinon le nom d'utilisateur de l'expéditeur.
+  \item \verb|Ajout du message| : Le texte du message est ajouté après le nom de l'expéditeur.
+  \item \verb|Stylisation basée sur l'expéditeur| : Les styles sont appliqués différemment pour distinguer visuellement les messages envoyés par l'utilisateur actuel de ceux des autres utilisateurs.
+  \item \verb|Ajout du message à l'interface utilisateur| : Le conteneur de message est ajouté à messagesDiv.
+  \item \verb|Défilement automatique| : L'affichage des messages défile automatiquement vers le bas pour montrer les nouveaux messages.
+\end{itemize}
+
+\vspace{0.5cm}
+
+\subsection{Résumé}
+
+Ce script crée un client de chat en temps réel. Lorsqu'un utilisateur envoie un message, il est transmis au serveur via Socket.IO, puis distribué à tous les clients connectés. Les messages entrants sont affichés dans l'interface utilisateur avec une distinction entre les messages de l'utilisateur actuel et ceux des autres utilisateurs. Ce script démontre une utilisation typique de Socket.IO pour une application de chat interactive.
+
+\newpage
+
+\section{Fonctionnement du serveur de l'application}
+\subsection{Initialisation d'Express et Configuration SSR}
+
+\begin{itemize}
+  \item \verb|Importation des modules nécessaires| : Express, le module HTTP, Socket.IO, et le gestionnaire SSR d'Astro.
+  \item \verb|Création d'une application Express| : const app = express();
+  \item \verb|Configuration du chemin de base| : const base = '/'; définit le chemin de base pour l'application.
+  \item \verb|Servir les fichiers statiques| : Les fichiers générés par Astro sont servis en tant que fichiers statiques.
+  \item \verb|Gestion SSR pour toutes les requêtes GET| : app.get('*', ssrHandler); utilise le gestionnaire SSR d'Astro pour toutes les requêtes GET, permettant le rendu des pages côté serveur.
+\end{itemize}
+
+\vspace{0.5cm}
+
+
+\subsection{Configuration du Serveur HTTP et Socket.IO}
+
+\begin{itemize}
+  \item \verb|Création d'un serveur HTTP| : Enveloppe l'application Express avec un serveur HTTP.
+  \item \verb|Initialisation de Socket.IO| : Crée une nouvelle instance de Socket.IO liée au serveur HTTP.
+\end{itemize}
+
+\vspace{0.5cm}
+
+
+\subsection{Gestion des Messages et Événements Socket.IO}
+\begin{itemize}
+  \item \verb|Stockage des messages| : Un tableau messages est utilisé pour stocker les messages du chat.
+  \item \verb|Gestion des connexions Socket.IO| : 
+  \subitem Lorsqu'un utilisateur se connecte, son ID de socket est enregistré, et les messages précédents sont envoyés à ce client.
+  \subitem Écoute les messages de chat entrants, les stocke, et les diffuse à tous les clients connectés.
+  \subitem Gère l'adhésion des utilisateurs aux salles de chat. Si une salle a moins de 4 utilisateurs, un nouvel utilisateur peut rejoindre. Sinon, un événement full\_room est émis.
+  \subitem Gère le démarrage d'un appel vidéo en diffusant un événement start\_call aux pairs dans la même salle.
+  \subitem Traite les offres WebRTC, les réponses et les candidats ICE en les transmettant aux pairs concernés.
+\end{itemize}
+
+\vspace{0.5cm}
+
+\subsection{Gestion de la Déconnexion}
+
+\begin{itemize}
+  \item \verb|Déconnexion d'un utilisateur| : Lorsqu'un utilisateur se déconnecte, un message est enregistré, et d'autres actions peuvent être effectuées comme la gestion de l'état de la salle.
+\end{itemize}
+
+\vspace{0.5cm}
+
+\subsection{Démarrage du Serveur}
+\begin{itemize}
+  \item \verb|Port du serveur| :  Le serveur écoute sur un port spécifié ou sur le port 8080 par défaut.
+  \item \verb|Démarrage du serveur| : Le serveur commence à écouter les connexions entrantes.
+\end{itemize}
+
+\vspace{0.5cm}
+
+\subsection{Résumé}
+
+Ce script serveur gère une application de chat en temps réel avec des fonctionnalités de chat vidéo en utilisant WebRTC et Socket.IO. Il gère également le rendu côté serveur pour les pages front-end construites avec Astro, offrant une expérience utilisateur fluide et intégrée.
 
 \newpage
 
@@ -1052,24 +751,661 @@ Au moment de raccrocher l'appel, il se peut la vidéo de l'autre interlocuteur r
 
 \subsection{Bugs inconnus}
 
-Si vous rencontrez d'autres bugs, merci de nous les signaler à l'adresse suivante : \url{mailto:contact@louispluviose.fr}{contact@louispluviose.fr}.
+Si vous rencontrez d'autres bugs, merci de nous les signaler à l'adresse suivante : \href{mailto:contact@louispluviose.fr}{contact@louispluviose.fr}.\\
 
 \newpage
 
 \section{Annexes}
 
-\subsection{Sous-titre 1}
+\subsection{Code du backend}
+
+\subsubsection{Client}
+
+\subsubsubsection{DOM elements}
+
+\begin{lstlisting}[language=JavaScript, caption={DOM Elements}, label=DOM Elements]
+  const roomSelectionContainer = document.getElementById('room-selection-container');
+  const roomInput = document.getElementById('room-input');
+  const connectButton = document.getElementById('connect-button');
+  const videoChatContainer = document.getElementById('video-chat-container');
+  const localVideoComponent = document.getElementById('local-video');
+\end{lstlisting}
+
+\subsubsubsection{Variables globales}
+
+\begin{lstlisting}[language=JavaScript, caption={Variables}, label=Variables]
+  const socket = io();
+  const mediaConstraints = { audio: true, video: { width: 1280, height: 720 } };
+  let localStream;
+  let roomId;
+  let peerConnections = {}; // Dictionary to hold all peer connections
+  
+  const iceServers = {
+      iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' }, // Serveur STUN existant
+          // Ajout de la configuration TURN
+          {
+              urls: 'turn:relay1.expressturn.com:3478', // URL du serveur TURN
+              username: 'efJJ0L80U0GANH5V0A', // Nom d'utilisateur
+              credential: 'LO5Tdr8aoKohTHDL' // Mot de passe
+          }
+      ]
+  };
+\end{lstlisting}
+
+\subsubsubsection{Button listeners}
+
+\begin{lstlisting}[language=JavaScript, caption={Button Listeners}, label=Button Listeners]
+  connectButton.addEventListener('click', () => {
+  joinRoom(roomInput.value);
+});
+
+const hangUpButton = document.getElementById('hangup-button');
+const toggleMicButton = document.getElementById('toggle-mic-button');
+const toggleCameraButton = document.getElementById('toggle-camera-button');
+
+hangUpButton.addEventListener('click', hangUpCall);
+toggleMicButton.addEventListener('click', toggleMicrophone);
+toggleCameraButton.addEventListener('click', toggleCamera);
+
+let isRoomCreator = false;
+\end{lstlisting}
+
+\subsubsubsection{Socket event callbacks}
+
+\begin{lstlisting}[language=JavaScript, caption={Socket Event Callbacks}, label=Socket Event Callbacks]
+  socket.on('room_created', async () => {
+  console.log('Socket event callback: room_created');
+  await setLocalStream(mediaConstraints);
+  isRoomCreator = true;
+});
+
+socket.on('room_joined', async () => {
+  console.log('Socket event callback: room_joined');
+  await setLocalStream(mediaConstraints);
+  isRoomCreator = false;
+  socket.emit('start_call', roomId);
+}); 
+
+socket.on('full_room', () => {
+  console.log('Socket event callback: full_room');
+  alert('The room is full, please try another one');
+});
+
+socket.on('start_call', async () => {
+  console.log('Socket event callback: start_call');
+  if (isRoomCreator) {
+    createPeerConnections();
+  }
+});
+
+socket.on('webrtc_offer', async (data) => {
+  console.log('Socket event callback: webrtc_offer');
+  
+  if (!localStream) {
+    console.log("Waiting to set local stream before handling offer");
+    await setLocalStream(mediaConstraints);
+  }
+  
+  if (!peerConnections[data.peerId]) {
+    await setupPeerConnection(data.peerId, false); // false = not an initiator
+  }
+  await handleOffer(data);
+});
+
+socket.on('webrtc_answer', (data) => {
+  console.log('Socket event callback: webrtc_answer');
+  handleAnswer(data);
+});
+
+socket.on('webrtc_ice_candidate', (data) => {
+  console.log('Socket event callback: webrtc_ice_candidate');
+  handleIceCandidate(data);
+});
+
+socket.on('new_peer', async (peerId) => {
+  console.log('Socket event callback: new_peer');
+  await createPeerConnection(peerId, false);
+});
+\end{lstlisting}
+
+\subsubsubsection{Fonctions}
+
+\begin{lstlisting}[language=JavaScript, caption={Fonctions Principales}, label=Fonctions Principales]
+  async function joinRoom(room) {
+  if (room === '') {
+    alert('Please type a room ID');
+  } else {
+    roomId = room;
+    socket.emit('join', room);
+    showVideoConference();
+    
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      document.getElementById('local-video').srcObject = localStream;
+    } catch (error) {
+      console.error('Could not get user media', error);
+    }
+  }
+}
+
+function showVideoConference() {
+  roomSelectionContainer.style = 'display: none';
+  videoChatContainer.style = 'display: block';
+
+  // Masquer le texte d'attente
+  const waitingText = document.getElementById('waitingText');
+  if (waitingText) {
+    waitingText.style.display = 'none';
+  }
+}
 
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse auctor elit vitae mauris dignissim bibendum. Fusce facilisis, sapien sed varius finibus, quam lacus auctor lorem, ac dapibus sapien ante quis odio. Sed tincidunt pharetra dui, in ultricies enim tincidunt ac. Suspendisse quis tincidunt justo. Duis interdum vitae ipsum ac venenatis. Nullam bibendum ex ac nisl tristique, vel euismod ex faucibus.\\
+async function setLocalStream(mediaConstraints) {
+  if (!localStream) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      console.log('Local stream obtained', stream);
+      localStream = stream;
+      const localVideoComponent = document.getElementById('local-video');
+      if (localVideoComponent) {
+        localVideoComponent.srcObject = stream;
+      } else {
+        console.error('The local video element was not found in the DOM.');
+      }
+    } catch (error) {
+      console.error('Could not get user media', error);
+    }
+  }
+}
 
-\subsection{Sous-titre 2}
+async function handleNewPeer(peerId) {
+  const peerConnection = await createPeerConnection(peerId);
+  localStream.getTracks().forEach(track => {
+    peerConnection.addTrack(track, localStream);
+  });
 
-\begin{lstlisting}[language=Python, caption={Exemple de code Python}, label=mon-code-python]
-	def hello(name):
-	  print("Hello, " + name + "!")
-	
-	hello("World")
+  const offer = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(offer);
+  socket.emit('webrtc_offer', {
+    type: 'webrtc_offer',
+    sdp: offer,
+    roomId,
+    peerId,
+  });
+}
+
+async function setupPeerConnection(peerId, isInitiator) {
+  const peerConnection = new RTCPeerConnection(iceServers);
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+  } else {
+    console.error("Local stream is not defined in setupPeerConnection");
+    return;
+  }
+
+  peerConnection.ontrack = (event) => addRemoteStream(event.streams[0], peerId);
+  peerConnection.onicecandidate = (event) => handleIceEvent(event, peerId);
+
+  peerConnections[peerId] = peerConnection;
+
+  if (isInitiator) {
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('webrtc_offer', { roomId, sdp: offer, peerId });
+  }
+}
+
+function addRemoteStream(event, peerId) {
+  let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+  if (!remoteVideoElement) {
+    remoteVideoElement = createRemoteVideoElement(peerId);
+  }
+
+  let stream;
+  if (event.streams && event.streams.length > 0) {
+    // Use the stream from the event if it exists
+    stream = event.streams[0];
+  } else {
+    // Create a new stream and add the track to it
+    stream = new MediaStream();
+    if (event.track) {
+      stream.addTrack(event.track);
+    }
+  }
+
+  // Additional logging to debug
+  console.log(`Adding remote stream for peer ${peerId}`, stream);
+  if (stream.getTracks().length === 0) {
+    console.error('No tracks in the remote stream');
+  }
+
+  remoteVideoElement.srcObject = stream;
+  remoteVideoElement.muted = false; // Ensure remote video is not muted
+  remoteVideoElement.volume = 1; // Ensure volume is set to maximum
+}
+
+function createRemoteVideoElement(peerId) {
+  const remoteVideo = document.createElement('video');
+  remoteVideo.id = `remote-video-${peerId}`;
+  remoteVideo.autoplay = true;
+  remoteVideo.playsInline = true;
+  remoteVideo.classList.add('remote-video', ...tailwindClasses);
+
+  document.getElementById('remote-videos-container')
+        .appendChild(remoteVideo);
+  return remoteVideo;
+}
+
+
+async function handleIceEvent(event, peerId) {
+  if (event.candidate) {
+    socket.emit('webrtc_ice_candidate', {
+      roomId,
+      candidate: event.candidate,
+      peerId
+    });
+  }
+}
+
+async function createPeerConnection(peerId) {
+  const peerConnection = new RTCPeerConnection(iceServers);
+
+  \begin{verbatim}
+  localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+  \end{verbatim}
+    // localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+  \end{verbatim}
+  localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+  // Gestion de l'ajout des streams distants
+  peerConnection.ontrack = (event) => addRemoteStream(event, peerId);
+
+  // Gestion de l'ajout des streams distants
+  peerConnection.ontrack = (event) => {
+  let remoteVideoElement = document.getElementById(`remote-video-${peerId}`);
+  if (!remoteVideoElement) {
+    remoteVideoElement = document.createElement('video');
+    remoteVideoElement.id = `remote-video-${peerId}`;
+    remoteVideoElement.autoplay = true;
+    remoteVideoElement.playsInline = true;
+    remoteVideoElement.classList.add('remote-video');
+    document.getElementById('remote-videos-container')
+        .appendChild(remoteVideoElement);
+  }
+  remoteVideoElement.srcObject = event.streams[0];
+};
+
+
+  // Gestion des candidats ICE
+  peerConnection.onicecandidate = (event) => {
+    if (event.candidate) {
+      console.log(`Sending ICE candidate to peer ${peerId}`, event.candidate);
+      socket.emit('webrtc_ice_candidate', {
+        type: 'webrtc_ice_candidate',
+        candidate: event.candidate,
+        roomId,
+        peerId,
+      });
+    }
+  };
+
+  peerConnections[peerId] = peerConnection;
+
+  \usepackage{lastpage}
+  if (!isRoomCreator) {
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('webrtc_offer', {
+      type: 'webrtc_offer',
+      sdp: offer,
+      roomId,
+      peerId,
+    });
+  }
+}
+
+
+async function handleOffer(data) {
+  try {
+    if (!peerConnections[data.peerId]) {
+      await createPeerConnection(data.peerId);
+    }
+
+    const peerConnection = peerConnections[data.peerId];
+    console.log(\texttt{\'{E}tat} de la connexion Peer avant setRemoteDescription: $\backslash$texttt{${peerConnection.signalingState}}$`);
+
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+
+    if (peerConnection.cachedIceCandidates) {
+      peerConnection.cachedIceCandidates.forEach(cachedCandidate => {
+        peerConnection.addIceCandidate(new RTCIceCandidate(cachedCandidate));
+      });
+      peerConnection.cachedIceCandidates = [];
+    }
+
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+
+    socket.emit('webrtc_answer', {
+      type: 'webrtc_answer',
+      sdp: answer,
+      roomId,
+      peerId: data.peerId,
+    });
+  } catch (error) {
+    console.error(`Erreur dans handleOffer pour le pair ${data.peerId}:`, error);
+  }
+}
+
+async function handleAnswer(data) {
+  const peerConnection = peerConnections[data.peerId];
+  console.log(`Peer connection state before setting remote description: ${peerConnection.signalingState}`);
+
+  if (peerConnection.signalingState === 'have-local-offer') {
+    try {
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      console.log(`Remote description set for peer ${data.peerId}`);
+    } catch (error) {
+      console.error(`Error in handleAnswer for peer ${data.peerId}:`, error);
+    }
+  } else {
+    console.log(`Peer connection not in the correct state to set remote description, current state: ${peerConnection.signalingState}`);
+  }
+}
+
+
+async function handleIceCandidate(data) {
+  const peerConnection = peerConnections[data.peerId];
+  if (peerConnection) {
+    if (!peerConnection.remoteDescription) {
+      console.log("Queueing ICE candidate as remote description is not yet set");
+      if (!peerConnection.cachedIceCandidates) {
+        peerConnection.cachedIceCandidates = [];
+      }
+      peerConnection.cachedIceCandidates.push(data.candidate);
+    } else {
+      console.log("Adding ICE candidate");
+      await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    }
+  }
+}
+
+
+
+function handleNewICECandidateMsg(data) {
+  const peerConnection = peerConnections[data.peerId];
+  peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+}
+
+function sendIceCandidate(candidate, peerId) {
+  socket.emit('webrtc_ice_candidate', {
+    roomId,
+    candidate,
+    peerId,
+  });
+}
+
+function addVideoStream(videoElement, stream, isLocal = false) {
+  \texttt{console.log('Adding videoElement.srcObject = stream;')}
+  videoElement.srcObject = stream;
+  videoElement.autoplay = true;
+  videoElement.playsInline = true;
+  videoElement.muted = isLocal;
+  if (isLocal) {
+    videoElement.id = 'local-video';
+    videoElement.style.backgroundColor = 'red'; 
+  } else {
+    videoElement.classList.add('remote-video');
+    videoElement.style.backgroundColor = 'green'; 
+  }
+  videoChatContainer.appendChild(videoElement);
+}
+
+function handleRemoteStreamAdded(stream, peerId) {
+  console.log(`handleRemoteStreamAdded called with peerId: ${peerId}`);
+  let videoElementId = `remote-video-${peerId}`;
+  let remoteVideoElement = document.getElementById(videoElementId);
+  
+  if (!remoteVideoElement) {
+    console.log(`Creating new video element for peer ${peerId}`);
+    remoteVideoElement = document.createElement('video');
+    remoteVideoElement.id = videoElementId;
+    remoteVideoElement.autoplay = true;
+    remoteVideoElement.playsInline = true;
+    remoteVideoElement.classList.add('remote-video');
+    document.getElementById('remote-videos-container')
+          .appendChild(remoteVideoElement);
+  }
+  else {
+    console.log(`Replacing video element for peer ${peerId}`);
+  }
+
+  remoteVideoElement.srcObject = stream;
+}
+
+
+
+function hangUpCall() {
+  console.log("Hang Up Call");
+  for (let peerId in peerConnections) {
+    peerConnections[peerId].close();
+    delete peerConnections[peerId];
+  }
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
+  }
+
+  let remoteVideosContainer = document.getElementById('remote-videos-container');
+  while (remoteVideosContainer.firstChild) {
+    remoteVideosContainer.removeChild(remoteVideosContainer.firstChild);
+  }
+
+  const waitingText = document.getElementById('waitingText');
+  if (waitingText) {
+    waitingText.style.display = 'block';
+  }
+
+  videoChatContainer.style.display = 'none';
+
+  roomSelectionContainer.style.display = 'none';
+}
+
+
+function toggleMicrophone() {
+  const audioTrack = localStream.getAudioTracks()[0];
+  if (audioTrack) {
+    audioTrack.enabled = !audioTrack.enabled;
+    console.log("Microphone toggled. Now enabled:", audioTrack.enabled);
+
+    // Update the track on all peer connections
+    for (let peerId in peerConnections) {
+      const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === audioTrack.kind);
+      if (sender) {
+        sender.replaceTrack(audioTrack);
+      }
+    }
+  }
+}
+
+
+function toggleCamera() {
+  const videoTrack = localStream.getVideoTracks()[0];
+  if (videoTrack) {
+    videoTrack.enabled = !videoTrack.enabled;
+    console.log("Camera toggled. Now enabled:", videoTrack.enabled);
+
+    // Update the track on all peer connections
+    for (let peerId in peerConnections) {
+      const sender = peerConnections[peerId].getSenders().find(s => s.track.kind === videoTrack.kind);
+      if (sender) {
+        sender.replaceTrack(videoTrack);
+      }
+    }
+  }
+}
+\end{lstlisting}
+\newpage
+
+\subsubsection{Messagerie}
+
+\begin{lstlisting}[language=JavaScript, caption={Code de la messagerie}, label=Code de la messagerie]
+  document.addEventListener('DOMContentLoaded', () => {
+    const socket = io();
+    const userId = Date.now().toString(); 
+
+    socket.on('connect', () => {
+      console.log('Connecte au serveur Socket.io');
+    });
+
+    const sendButton = document.getElementById('sendButton');
+    const messagesDiv = document.getElementById('messages');
+    const usernameInput = document.getElementById('username');
+    const messageInput = document.getElementById('message');
+
+    if (sendButton && messagesDiv && usernameInput && messageInput) {
+      sendButton.addEventListener('click', () => {
+        const username = usernameInput.value || 'Anonyme';
+        const message = messageInput.value;
+
+        if (message.trim() !== '') {
+          socket.emit('chat_message', { userId, username, message });
+          messageInput.value = '';
+        }
+      });
+
+      socket.on('chat_message', (data) => {
+        const messageContainer = document.createElement('div');
+        messageContainer.className = "flex my-2";
+
+        const messageElement = document.createElement('div');
+        messageElement.className = "px-4 py-2 rounded-lg shadow";
+
+        const senderName = document.createElement('strong');
+        senderName.textContent = data.userId === userId ? 'Vous' : data.username;
+        
+        messageElement.appendChild(senderName);
+        messageElement.appendChild(document.createTextNode(`: ${data.message}`));
+
+        if (data.userId === userId) {
+          messageContainer.classList.add('justify-end');
+          messageElement.classList.add('bg-teal-500', 'text-white');
+        } else {
+          messageContainer.classList.add('justify-start');
+          messageElement.classList.add('bg-gray-200', 'text-black');
+        }
+
+        messageContainer.appendChild(messageElement);
+        messagesDiv.appendChild(messageContainer);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+    }
+  });
+\end{lstlisting}
+
+\newpage
+
+\subsubsection{Serveur}
+
+\begin{lstlisting}[language=JavaScript, caption={Code du serveur}, label=code du serveur]
+  import express from 'express';
+  import { createServer } from 'http';
+  import { Server as SocketIOServer } from 'socket.io';
+  import { handler as ssrHandler } from './dist/server/entry.mjs';
+  
+  const app = express();
+  const base = '/';
+  
+  // Serve the static files from the Astro build
+  app.use(base, express.static('dist/client/'));
+  app.use('/scripts', express.static('dist/scripts'));
+  
+  // Handle SSR for all get requests
+  app.get('*', ssrHandler);
+  
+  // Create an HTTP server and configure Socket.io
+  const server = createServer(app);
+  const io = new SocketIOServer(server);
+  
+  let messages = [];
+  
+  // Socket.io event handling
+  io.on('connection', (socket) => {
+    console.log('A user connected: ' + socket.id);
+  
+    messages.forEach((message) => {
+      socket.emit('chat_message', message);
+    });
+  
+    socket.on('chat_message', (data) => {
+      messages.push(data);
+      console.log('message: ' + data);
+      io.emit('chat_message', data);
+    });
+  
+    socket.on('disconnect', () => {
+      console.log('User disconnected: ' + socket.id);
+    });
+  
+    socket.on('join', (roomId) => {
+      const selectedRoom = io.sockets.adapter.rooms.get(roomId);
+      const numberOfClients = selectedRoom ? selectedRoom.size : 0;
+  
+      console.log(`Client ${socket.id} requesting to join room ${roomId}`);
+      if (numberOfClients < 4) {
+        console.log(`Joining room ${roomId} and emitting room_joined socket event`);
+        socket.join(roomId);
+        socket.to(roomId).emit('new_peer', socket.id); // Notify others in the room
+      } else {
+        console.log(`Can't join room ${roomId}, emitting full_room socket event`);
+        socket.emit('full_room', roomId);
+      }
+    });
+  
+    socket.on('start_call', (roomId) => {
+      console.log(`Broadcasting start_call event to peers in room ${roomId}`);
+      socket.broadcast.to(roomId).emit('start_call');
+    });
+  
+    socket.on('webrtc_offer', (data) => {
+      console.log(`Received offer from ${socket.id} in room ${data.roomId}`);
+      socket.to(data.peerId).emit('webrtc_offer', {
+        peerId: socket.id, 
+        sdp: data.sdp
+      });
+    });
+  
+    socket.on('webrtc_answer', (data) => {
+      console.log(`Received answer from ${socket.id} in room ${data.roomId}`);
+      socket.to(data.peerId).emit('webrtc_answer', {
+        peerId: socket.id, 
+        sdp: data.sdp
+      });
+    });
+  
+    socket.on('webrtc_ice_candidate', (data) => {
+      console.log(`Received ICE candidate from ${socket.id} for room ${data.roomId}`);
+      socket.to(data.peerId).emit('webrtc_ice_candidate', {
+        peerId: socket.id,
+        label: data.label,
+        candidate: data.candidate
+      });
+    });
+  
+    // Handle user disconnect
+    socket.on('disconnect', () => {
+      console.log('User disconnected: ' + socket.id);
+    });
+  });
+  
+  // Start the server on the specified port or default to port 8080
+  const PORT = process.env.PORT || 8080;
+  server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 \end{lstlisting}
 
 \newpage
