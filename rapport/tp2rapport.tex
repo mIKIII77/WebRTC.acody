@@ -1,5 +1,4 @@
-\documentclass[12pt, a4paper, oneside]{thesis}
-\usepackage{tgheros}
+\documentclass[12pt, a4paper, oneside]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{kpfonts}
 \usepackage[T1]{fontenc}
@@ -286,6 +285,54 @@ L'accent est mis sur la facilité d'utilisation. Les utilisateurs peuvent créer
 
 \section{Utilisation de l'application}
 
+\subsection{Les Réunions}
+
+La page Réunion est spécialement conçue pour orchestrer des réunions virtuelles en temps réel en utilisant une application WebRTC. Découvrez comment les utilisateurs peuvent tirer parti de cette fonctionnalité immersive:
+
+\subsection*{Entrer dans une salle de réunion:}
+\begin{itemize}
+  \item Saisir le numéro de la salle dans le champ prévu. (Le numéro de la salle peut être choisi librement sans aucune restriction.)
+  \item Cliquer sur "Rejoindre la salle de réunion" pour établir la connexion.
+  \item Lors de la première connexion, l'utilisateur est invité à autoriser l'accès à la caméra et au microphone en fonction du navigateur utilisé.
+  \item Cliquer sur "Autoriser" pour permettre l'accès à la caméra et au microphone.
+  \item L'utilisateur est désormais connecté à la salle de réunion, prêt à participer de manière interactive.
+\end{itemize}
+
+\subsection*{Vidéoconférence:}
+\begin{itemize}
+  \item L'interface vidéo offre une vue complète avec la vidéo locale de l'utilisateur et celles des autres participants.
+  \item Après s'être connecté à la salle de réunion, l'utilisateur peut visualiser sa propre vidéo ainsi que celles des autres participants, créant une expérience immersive.
+  \item La plateforme prend en charge jusqu'à trois vidéos distantes simultanées, favorisant une collaboration fluide.
+\end{itemize}
+
+\subsection*{Gestion des actions:}
+\begin{itemize}
+  \item Bouton "Abandonner l'appel" pour quitter la réunion avec une sortie aisée.
+  \item Bouton "Activer/Désactiver le microphone" pour contrôler la diffusion audio.
+  \item Bouton "Activer/Désactiver la caméra" pour gérer la visibilité vidéo selon les besoins de l'utilisateur.
+\end{itemize}
+
+\newpage
+
+\subsection{La Messagerie en Temps Réel}
+
+La page Messagerie est dédiée à la communication textuelle en temps réel, offrant une plateforme de discussion instantanée. Découvrez comment les utilisateurs peuvent exploiter cette fonctionnalité:
+
+\subsection*{Saisie d'informations | Envoi de messages:}
+\begin{itemize}
+  \item Entrer le nom d'utilisateur dans le champ prévu. (Ce nom sera affiché dans les messages, permettant une identification claire pour les autres participants.)
+  \item Saisir le message dans le champ dédié, permettant une expression libre et instantanée.
+  \item Cliquer sur le bouton "Envoyer" pour partager le message avec l'ensemble des participants, favorisant l'interaction dynamique.
+\end{itemize}
+
+\subsection*{Affichage des messages:}
+\begin{itemize}
+  \item Les messages s'affichent clairement avec le nom de l'expéditeur et le contenu du message.
+  \item Un style distinct est appliqué aux messages de l'utilisateur actuel, facilitant une identification rapide.
+  \item Les messages sont présentés dans l'ordre chronologique, offrant une vue contextuelle de la conversation.
+\end{itemize}
+
+
 \newpage
 
 \section{Fonctionnement de l'application de réunion}
@@ -553,11 +600,16 @@ Au cours de cette analyse, nous examinerons la conception visuelle, la facilité
     \caption{Page Messagerie de l'application}
 \end{figure}
 
-\section{Technologies utilisées}
-\subsection{Astro.js - Framework frontend utilisé}
-Nous avons utilisé le framework Astro.js pour la réalisation de la partie frontend de notre application web. C'est un framework récent sur le marché qui adopte une approche "server-first", privilégiant le rendu côté serveur par rapport au rendu côté client dans le navigateur. Cela offre des performances très élevées, ce qui nous intéresse dans le cas de notre projet. De plus, sa compatibilité avec des frameworks tels que "TailwindCSS" et "React.js" nous a permis d'appliquer un design moderne et convivial pour l'utilisateur.
+\subsection{Technologies utilisées}
+\subsubsection{Astro.js - Framework frontend utilisé}
+Nous avons utilisé le framework Astro.js pour la réalisation de la partie frontend de notre application web. 
+C'est un framework récent sur le marché qui adopte une approche "server-first", privilégiant le rendu côté serveur par rapport au rendu côté client dans le navigateur. 
+Cela offre des performances très élevées, ce qui nous intéresse dans le cas de notre projet.
+Également dans ce framework, tout est réuni dans un seul fichier texttt{.astro} : HTML, CSS et JavaScript. 
+De plus, sa compatibilité avec des frameworks tels que "TailwindCSS" et "React.js" nous a permis d'appliquer un design moderne et convivial pour l'utilisateur.
 
-\subsection{TailwindCSS et React.js}
+
+\subsubsection{TailwindCSS et React.js}
 Tailwind CSS est un framework CSS utilitaire qui simplifie le développement et la stylisation des interfaces utilisateur. Contrairement aux frameworks CSS traditionnels basés sur des composants prédéfinis, Tailwind CSS fournit des classes utilitaires directement applicables dans le code HTML. Ces classes permettent de définir rapidement et de manière cohérente des styles tels que la couleur, la taille, la marge, le rembourrage, etc. L'approche de Tailwind CSS encourage une flexibilité accrue tout en offrant une base solide pour la conception.
 
 React.js est une bibliothèque JavaScript développée par Facebook pour la construction d'interfaces utilisateur interactives. React utilise une approche basée sur les composants, permettant de créer des morceaux d'interface réutilisables et modulaires. Cette approche facilite la gestion de l'état de l'application et la mise à jour dynamique de l'interface en réponse aux changements.
@@ -566,14 +618,14 @@ Dans le cadre de notre projet, nous avons utilisé Tailwind CSS pour simplifier 
 
 Parallèlement, nous avons intégré React.js pour structurer l'interface utilisateur de manière modulaire. Les composants React ont été utilisés pour diviser l'application en parties réutilisables, facilitant ainsi la maintenance et la gestion de l'état global de l'application.
 
-\section{Contexte de l'Application}
+\subsection{Contexte de l'Application}
 L'application vise à faciliter les réunions virtuelles en temps réel. Elle offre une plateforme pour la communication vidéo instantanée, améliorant ainsi la collaboration à distance. Les fonctionnalités clés comprennent la possibilité d'entrer dans une salle de réunion en utilisant un numéro spécifique, la gestion du son et de la caméra, ainsi que la capacité à abandonner les appels en un clic.
 En plus des fonctionnalités de réunion vidéo en temps réel, l'application intègre également une fonctionnalité de messagerie pour une communication asynchrone entre les utilisateurs. Cette fonctionnalité permet aux utilisateurs d'échanger des messages textuels, complétant ainsi l'expérience de communication collaborative.
 
-\subsection{Public Cible}
+\subsubsection{Public Cible}
 L'application cible un large éventail d'utilisateurs professionnels cherchant à optimiser leurs réunions virtuelles. Elle s'adresse particulièrement aux équipes travaillant à distance, aux entreprises cherchant à améliorer la communication interne et externe, ainsi qu'aux individus ayant besoin d'une solution efficace pour les réunions en ligne.
 
-\subsection{Objectifs de l'Application (Réunions)}
+\subsubsection{Objectifs de l'Application (Réunions)}
 \begin{enumerate}
     \item \textbf{Faciliter les Réunions Virtuelles :} Offrir une plateforme conviviale pour l'organisation de réunions virtuelles.
     \item \textbf{Communication Vidéo en Temps Réel :} Permettre des appels vidéo en temps réel pour une interaction plus dynamique.
@@ -581,14 +633,14 @@ L'application cible un large éventail d'utilisateurs professionnels cherchant �
     \item \textbf{Optimiser la Collaboration à Distance :} Fournir des fonctionnalités simples et efficaces pour améliorer la collaboration à distance.
 \end{enumerate}
 
-\subsection{Objectifs de l'Application (Messagerie)}
+\subsubsection{Objectifs de l'Application (Messagerie)}
 \begin{enumerate}
     \item \textbf{Communication Asynchrone :} Fournir une plateforme de messagerie pour permettre des échanges asynchrones entre les utilisateurs.
     \item \textbf{Facilité d'Utilisation :} Assurer une interface conviviale pour la saisie et l'envoi de messages.
     \item \textbf{Identité de l'Utilisateur :} Permettre aux utilisateurs de spécifier leur nom d'utilisateur pour une identification personnalisée.
 \end{enumerate}
 
-\subsection{Principales Fonctionnalités (Réunions)}
+\subsubsection{Principales Fonctionnalités (Réunions)}
 \begin{enumerate}
     \item \textbf{Entrée dans une Salle de Réunion :} Les utilisateurs peuvent rejoindre une salle de réunion en saisissant un numéro spécifique.
     \item \textbf{Gestion du Son et de la Caméra :} Contrôle de la fonction audio et vidéo pour une expérience personnalisée.
@@ -596,7 +648,7 @@ L'application cible un large éventail d'utilisateurs professionnels cherchant �
     \item \textbf{Affichage Vidéo en Temps Réel :} Possibilité de visualiser les flux vidéo en temps réel des participants.
 \end{enumerate}
 
-\subsection{Principales Fonctionnalités (Messagerie)}
+\subsubsection{Principales Fonctionnalités (Messagerie)}
 \begin{enumerate}
     \item \textbf{Saisie de Nom d'Utilisateur :} Les utilisateurs peuvent entrer leur nom d'utilisateur pour une identification personnalisée.
     \item \textbf{Saisie de Message :} Interface pour la saisie et l'envoi de messages texte.
@@ -604,23 +656,46 @@ L'application cible un large éventail d'utilisateurs professionnels cherchant �
     \item \textbf{Styles Différenciés :} Les messages de l'utilisateur actuel sont stylisés différemment pour une distinction visuelle.
 \end{enumerate}
 
-\subsection{Implémentation Technique (Réunions)}
+\subsubsection{Implémentation Technique (Réunions)}
 \begin{enumerate}
     \item \textbf{Utilisation de Socket.io :} Les connexions peer-to-peer WebRTC sont établies via les événements de socket, notamment les événements \texttt{room\_created}, \texttt{room\_joined}, et \texttt{start\_call}.
     \item \textbf{RTCPeerConnection :} Pour créer et gérer les connexions peer-to-peer.
     \item \textbf{Interface Utilisateur :} La partie vidéo est divisée en un conteneur local et plusieurs conteneurs distants.
 \end{enumerate}
 
-\subsection{Implémentation Technique (Messagerie)}
+\subsubsection{Implémentation Technique (Messagerie)}
 \begin{enumerate}
     \item \textbf{Utilisation de Socket.io :} La messagerie utilise Socket.io pour la gestion des communications en temps réel.
     \item \textbf{Identifiant Unique de l'Utilisateur :} Chaque utilisateur est associé à un identifiant unique généré au moment de la connexion.
     \item \textbf{Événements Socket.io :} L'application utilise des événements Socket.io tels que 'connect' et 'chat\_message' pour gérer la communication.
 \end{enumerate}
 
+\newpage
 \section{Analyse UI/UX}
+
+\subsection{Disposition principal de l'application}
+
+Un composant principal de l'application est mise en place pour gérer la disposition globale de l'application. Ce composant est utilisé pour encapsuler les composants de navigation et de pied de page, ainsi que le contenu de la page. Il est également utilisé pour définir les paramètres globaux de l'application, tels que la couleur de fond,la taille maximale de la page, la police et etc... \newline
+Le code source est présent en annexe (voir Annexe 4). Voici une explication technique à travers différents points sur la structure du composant principal de l'application.
+
+\subsubsection{Structure Globale}
+Le code présente une structure HTML en Astro, avec l'inclusion de composants tels que \texttt{MainHead}, \texttt{Nav}, et \texttt{Footer}. Le corps de la page est défini avec des classes CSS pour la mise en page, la couleur de fond et la taille maximale.
+
+\subsubsection{Barre de Navigation (\texttt{<Nav />})}
+La barre de navigation est intégrée via le composant \texttt{Nav}. Cependant, le code spécifique à la barre de navigation elle-même n'est pas inclus ici. 
+Nous importons le composant \texttt{Nav} depuis le fichier \texttt{Nav.astro} (voir Annexe 3).
+
+\subsubsection{Styles Globaux}
+Des styles globaux sont définis, notamment pour le corps de la page, la police (San Francisco) et la couleur de fond. 
+\subsubsection{Police San Francisco}
+Une police personnalisée, San Francisco, est intégrée via \texttt{@font-face}. Cela peut contribuer à l'esthétique globale de la page, mais la police étant chargée depuis un lien externe, la vitesse de chargement peut être affectée.
+
+\subsubsection{Utilisation de Variables Dynamiques}
+Des variables telles que \texttt{title}, \texttt{seoTitle}, et \texttt{seoDesc} provenant du composant \texttt{MainHead} sont présentes. Cela permet une personnalisation dynamique du titre et de la description SEO.
+
+\newpage
 \subsection{Navigation}
-La navigation au sein de l'application s'effectue via une barre de navigation positionnée en haut de la page. Cette barre comprend deux boutons : "Réunions" et "Messages". L'utilisateur final est ainsi invité à faire son choix à travers cette barre de navigation, lui offrant une manière claire et accessible d'accéder aux fonctionnalités désirées.
+La dispostiion et la navigation au sein de l'application s'effectue via une barre de navigation positionnée en haut de la page. Cette barre comprend deux boutons : "Réunions" et "Messages". L'utilisateur final est ainsi invité à faire son choix à travers cette barre de navigation, lui offrant une manière claire et accessible d'accéder aux fonctionnalités désirées.
 
 \begin{figure}[h]
     \centering
@@ -629,7 +704,7 @@ La navigation au sein de l'application s'effectue via une barre de navigation po
 \end{figure}
 
 \subsubsection{Réalisation Technique}
-Le code source est présent en annexe (voir Annexe X). Voici une explication technique à travers différents points sur la structure de la "NavBar" (barre de navigation) de l'application.
+Le code source est présent en annexe (voir Annexe 3 - 15.1.3). Voici une explication technique à travers différents points sur la structure de la "NavBar" (barre de navigation) de l'application.
 
 \begin{enumerate}
     \item \textbf{Structure HTML et classes CSS :}
@@ -691,18 +766,101 @@ Le code source est présent en annexe (voir Annexe X). Voici une explication tec
     - Les effets visuels au survol, tels que le changement d'opacité et la rotation de teinte, ajoutent une dimension interactive à la barre de navigation, améliorant l'expérience visuelle.
 
 \end{enumerate}
+\newpage
 \subsection{Page - Réunion}
 
+La page de réunion Webrtc représente le cœur de l'application WebRTC. Conçue pour faciliter les réunions virtuelles en temps réel, cette page offre une interface conviviale et des fonctionnalités robustes de communication vidéo. L'objectif est de permettre aux utilisateurs de se connecter facilement, de participer à des réunions de manière efficace, tout en offrant une expérience visuelle optimale. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{images/ReunionPres.png}
+  \caption{La page de réunion}
+\end{figure}
+
+\subsubsection{Réalisation Technique}
+La page de réunion Webrtc est élaborée avec une approche technique solide, combinant l'utilisation d'un composant de mise en page et des styles CSS soigneusement définis
+
+\begin{enumerate}
+    \item \textbf{Composant de Mise en Page :} L'utilisation du composant \texttt{Layout} assure une gestion centralisée du contenu, améliorant ainsi la maintenance.
+    \item \textbf{Styles CSS pour Vidéos :} Les règles CSS détaillées assurent une disposition précise des vidéos, garantissant une expérience visuelle optimale.
+    \item \textbf{Affichage Conditionnel Dynamique :} Des règles conditionnelles sont utilisées pour ajuster dynamiquement l'affichage en fonction de l'état de la page.
+\end{enumerate}
+
+\subsubsection{Expérience Utilisateur}
+La page de réunion Webrtc offre une expérience utilisateur immersive et interactive, grâce à des fonctionnalités pensées pour faciliter les interactions en temps réel.
+
+\begin{enumerate}
+    \item \textbf{Interface Conviviale :} La mise en page soigneusement conçue assure une navigation intuitive et une utilisation facile.
+    \item \textbf{Visualisation Vidéo Optimal :} Les dimensions et les positions des vidéos sont gérées de manière à offrir une présentation visuelle optimale.
+    \item \textbf{Interaction Intuitive :} Des boutons d'action avec des icônes permettent des actions rapides, améliorant ainsi l'expérience utilisateur.
+    \item \textbf{Affichage Conditionnel :} Certains éléments sont dynamiquement affichés ou masqués en fonction de l'état de la page, optimisant ainsi l'interface utilisateur.
+\end{enumerate}
+
+
+\newpage
 \subsection{Page - Messagerie}
 
-\section{Conclusion de l'analyse UI/UX}
+Conçue pour simplifier les échanges professionnels, cette page présente une interface utilisateur conviviale et des fonctionnalités de messagerie robustes.
 
-\subsection{La Navigation}
-\subsection{Analyse de l'UI (Interface Utilisateur)}
-\subsection{Analyse de l'UX (Expérience Utilisateur)}
-\subsection{Recommandations et Améliorations}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{images/MessageriePres.png}
+  \caption{La page de Messagerie}
+\end{figure}
+
+\subsubsection{Réalisation Technique}
+La page de messagerie Webrtc est construite avec une approche technique solide, tirant parti du composant de mise en page et de styles CSS détaillés.
+
+\begin{enumerate}
+    \item \textbf{Composant de Mise en Page :} L'utilisation du composant \texttt{Layout} permet une gestion centralisée du contenu, simplifiant ainsi la maintenance.
+    \item \textbf{Styles CSS pour la Messagerie :} Des règles CSS détaillées sont employées pour styliser la zone de chat, assurant une expérience visuelle cohérente.
+\end{enumerate}
+
+\subsubsection{Expérience Utilisateur}
+La page de messagerie Webrtc offre une expérience utilisateur immersive grâce à des fonctionnalités dédiées à la communication en temps réel.
+
+\begin{enumerate}
+    \item \textbf{Interface Intuitive :} La section de messagerie est conçue avec une mise en page claire, facilitant la lecture et l'envoi de messages.
+    \item \textbf{Chat en Temps Réel :} Les messages s'affichent dynamiquement, offrant une communication instantanée et fluide.
+    \item \textbf{Gestion Simple des Utilisateurs :} L'ajout d'un nom d'utilisateur est facilité par une zone de saisie dédiée, permettant une personnalisation rapide.
+    \item \textbf{Envoi Facile de Messages :} La zone de saisie de message et le bouton "Envoyer" simplifient le processus d'envoi de messages.
+\end{enumerate}
+
 \newpage
+\subsection{Pied de page - Footer}
+Le pied de page (footer) de l'application est défini de manière concise et centrée, 
+avec une structure HTML minimale. Voici une explication rapide du code du pied de page.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{images/PiedDePage.png}
+  \caption{Le pied de page}
+\end{figure}
+
+\subsubsection{Réalisation Technique}
+\begin{enumerate}
+  \item[1.] \textbf{Structure HTML :}
+  \newline- La balise \texttt{<footer>} encadre le contenu du pied de page.\newline
+  - Les classes CSS comme \texttt{`mt-auto`, `py-4`, et `text-center`} sont utilisées pour ajuster la présentation, offrant une marge supérieure automatique, un espacement vertical optimal, et un centrage du texte sur tous les écrans.
+
+
+  \item[2.] \textbf{Dynamisme de l'Année :}
+  \newline
+  - La balise \texttt{<span id="copyright"></span>} permet la mise à jour dynamique de l'année actuelle. c'est effectué grace à un simple JavaScript.
+\end{enumerate}
+
+\subsubsection{Expérience Utilisateur}
+Le pied de page assure une expérience utilisateur enrichissante en combinant une présentation soignée avec des effets visuels interactifs.
+
+\begin{enumerate}
+  \item[1.] \textbf{Styles Visuels des Liens :}
+  \newline - Les liens dans le pied de page bénéficient d'une amélioration visuelle lors du survol.\newline
+  - Une transition fluide d'opacité et une rotation de teinte apportent un dynamisme visuel agréable.
+\end{enumerate}
+
+
+
+\newpage
 \section{Performances de l'application}
 
 \subsection{Page Load Time}
@@ -779,6 +937,378 @@ Si vous rencontrez d'autres bugs, merci de nous les signaler à l'adresse suivan
 
 \section{Annexes}
 
+\subsection{Code du frontend}
+
+\subsubsection{Page - Réunions}
+
+\begin{lstlisting}[language=HTML, caption={Page - Réunions}, label=Page - Reunions]
+
+  ---
+  import Layout from '../layouts/Layout.astro';
+  ---
+  <Layout
+    seoTitle="Reunion Webrtc - Application de Communication Video en Temps Reel | Acody"
+    seoDesc="Facilitez vos reunions professionnelles avec notre application de projet Webrtc. Effectuez des appels video en temps reel, abandonnez les appels en un clic, et gerez facilement le son et la camera. Optimisez votre collaboration a distance avec des fonctionnalites simples et efficaces."
+  >
+  
+  
+  <div class="flex flex-col bg-neutral-900 rounded-md">
+    <div class="flex-none bg-neutral-800 p-4 rounded-md shadow-md flex flex-col">
+      <h1 class="text-2xl font-bold"> Entrer dans une salle de reunion </h1>
+      <div class="grid grid-rows-1 mt-2">
+        <input id="room-input" name="room" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:border-teal-500 bg-neutral-700 col-span-6" placeholder="Numero de votre salle de reunion" />
+        <button id="connect-button" type="submit" class="font-semibold w-full bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none col-start-8">
+        Rejoindre la salle de reunion
+        </button>
+      </div>
+    </div>
+    
+    <style type="text/css">
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+    
+      #video-chat-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Deux colonnes /
+        grid-template-rows: 1fr 1fr; / Deux rangees */
+        gap: 10px;
+        width: 100vw;
+        height: 30vh;
+        padding: 10px;
+      }
+    
+      video {
+        width: 50%;
+        height: 40%;
+        object-fit: cover;
+      }
+    
+      #local-video {
+        grid-row: 2;
+        grid-column: 1;
+      }
+    
+      .remote-video-1 {
+        grid-row: 1;
+        grid-column: 1;
+      }
+    
+      .remote-video-2 {
+        grid-row: 1;
+        grid-column: 2;
+      }
+    
+      .remote-video-3 {
+        grid-row: 2;
+        grid-column: 2;
+      }
+  
+      .room-selection-container {
+        display: none;
+      }
+      </style>
+  
+  
+    <!-- Partie fixe pour la video avec une hauteur personnalisee -->
+    <div class="relative flex-grow">
+      <div class="sticky top-0 bg-neutral-800 p-4 rounded-md shadow-md h-16 my-8 min-h-[300px] flex items-center justify-center">
+        <div class="rounded-md p-4 max-w-sm w-full mx-auto">
+          <div class="animate-pulse">
+            <h1 id="waitingText" class="text-teal-300 opacity-50 text-xl text-center">En attente de la connexion a la reunion</h1>
+          </div>
+  
+        </div>
+        <div id="room-selection-container" class="display: hidden">
+          <h1>WebRTC video conference</h1>
+          <label>Enter the number of the room you want to connect</label>
+          <input id="room-input" type="text" />
+          <button id="connect-button">CONNECT</button>
+          </div>
+        
+          <div id="video-chat-container" class="video-position" style="display: none">
+            <div id="local-video-container">
+              <video id="local-video" autoplay muted></video>
+            </div>
+          <div id="remote-videos-container">
+            <video id="remote-video-1"></video>
+            <video id="remote-video-2"></video>
+            <video id="remote-video-3"></video>
+          </div>
+      </div>
+    </div>
+  
+    <!-- Contenu principal -->
+    <div class="bg-neutral-800 p-4 rounded-md flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8" data-astro-cid-j7pv25f6="">
+      <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow flex items-center" id="hangup-button" data-astro-cid-j7pv25f6="">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2" data-astro-cid-j7pv25f6="">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" data-astro-cid-j7pv25f6=""></path>
+        </svg>
+        Abandonner l'appel
+      </button>
+    
+      <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow flex items-center" id="toggle-mic-button" data-astro-cid-j7pv25f6="">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2" data-astro-cid-j7pv25f6="">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" data-astro-cid-j7pv25f6=""></path>
+        </svg>
+        Mute microphone
+      </button>
+    
+      <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow flex items-center" id="toggle-camera-button" data-astro-cid-j7pv25f6="">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2" data-astro-cid-j7pv25f6="">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 01-2.25-2.25V9m12.841 9.091L16.5 19.5m-1.409-1.409c.407-.407.659-.97.659-1.591v-9a2.25 2.25 0 00-2.25-2.25h-9c-.621 0-1.184.252-1.591.659m12.182 12.182L2.909 5.909M1.5 4.5l1.409 1.409" data-astro-cid-j7pv25f6=""></path>
+        </svg>
+        Mute camera
+      </button>
+    </div>
+  
+    </div>
+  </div>
+
+\end{lstlisting}
+
+\newpage
+
+\subsubsection{Page - Messagerie}
+
+\begin{lstlisting}[language=HTML, caption={Page - Messagerie}, label=Page - Messagerie]
+  ---
+  import Layout from '../layouts/Layout.astro';
+  ---
+  <Layout seoTitle="Messagerie Webrtc - Application de Communication Video en Temps Reel" seoDesc="Facilitez vos reunions professionnelles avec notre application de projet Webrtc. 
+  Effectuez des appels video en temps reel, abandonnez les appels en un clic, et gerez facilement le son et la camera. 
+  Optimisez votre collaboration a distance avec des fonctionnalites simples et efficaces.">
+    <div class="bg-neutral-800 text-white p-4 rounded-md shadow-md mt-8">
+      <h1 class="text-2xl font-semibold">Messagerie</h1>
+    </div>
+  
+    <!-- Zone de chat (ajoutee) -->
+    <div id="messages" class="messages-container">
+      <!-- Les messages s'afficheront ici -->
+    </div>
+  
+  
+    <!-- Zone de saisie de nom d'utilisateur -->
+    <div class="bg-neutral-800 p-4 rounded-md shadow-md mb-4 mt-4">
+      <input
+        id="username"
+        type="text"
+        placeholder="Entrez votre nom d'utilisateur..."
+        class="flex-1 p-2 border border-neutral-300 rounded-md bg-neutral-800"
+      />
+    </div>
+  
+    <!-- Zone de saisie de message -->
+    <div class="bg-neutral-800 p-4 rounded-md shadow-md mb-12">
+      <div class="flex">
+        <input
+          id="message"
+          type="text"
+          placeholder="Ecrivez votre message..."
+          class="flex-1 p-2 border border-neutral-300 rounded-l-md bg-neutral-800"
+        />
+        <button id="sendButton" class="bg-teal-500 text-white p-2 rounded-r-md">Envoyer</button>
+      </div>
+    </div>
+  
+    <style>
+      #messages {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+    </style>
+
+  </Layout>
+  
+\end{lstlisting}
+
+
+\newpage
+\subsubsection{Component - NavBar}
+
+\begin{lstlisting}[language=HTML, caption={Component - NavBar}, label=Component - NavBar]
+  ---
+  import { Astronav, MenuItems, MenuIcon } from 'astro-navbar'
+  ---
+  
+  <header class="gap-5 p-5 lg:flex">
+    <Astronav>
+      <svg class="icon mt-1" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 640 512"
+        ><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+        <style>
+          svg {
+            fill: #ffffff;
+          }
+        </style><path
+          d="M0 336c0 79.5 64.5 144 144 144H512c70.7 0 128-57.3 128-128c0-61.9-44-113.6-102.4-125.4c4.1-10.7 6.4-22.4 6.4-34.6c0-53-43-96-96-96c-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32C167.6 32 96 103.6 96 192c0 2.7 .1 5.4 .2 8.1C40.2 219.8 0 273.2 0 336z"
+        ></path></svg
+      >
+      <div class="flex w-full justify-between">
+        <a href="/" class="icon">WebRTC<strong>.Acody</strong></a>
+        <div class="block lg:hidden">
+          <MenuIcon class="icon-menus h-5 w-6 text-white" />
+        </div>
+      </div>
+      <MenuItems class="test hidden lg:flex">
+        <ul class="flex flex-col lg:flex-row lg:gap-5">
+          <li class="separator-mob">- - -</li>
+          <li><a href="/">Reunion</a></li>
+          <li class="separator">/</li>
+          <li class="separator-mob">- - -</li>
+          <li><a href="/messages">Messages</a></li>
+  
+        </ul>
+      </MenuItems>
+    </Astronav>
+  </header>
+  
+  <style>
+    .separator-mob {
+      display: none;
+    }
+  
+    ul.flex li a {
+      opacity: 0.7;
+      -webkit-transition:
+        opacity 0.5s ease-in-out,
+        filter 0.5s ease-in-out;
+      transition:
+        opacity 0.5s ease-in-out,
+        filter 0.5s ease-in-out;
+    }
+  
+    ul.flex li a:hover {
+      opacity: 1;
+      -webkit-filter: hue-rotate(90deg);
+      filter: hue-rotate(90deg);
+    }
+  
+    .icon {
+      -webkit-filter: hue-rotate(90deg);
+      filter: hue-rotate(90deg);
+    }
+  
+    @media (max-width: 768px) {
+      .separator {
+        display: none;
+      }
+      .separator-mob {
+        display: block;
+        font-size: 20px;
+      }
+      li {
+        font-size: 20px;
+      }
+      .icon {
+        font-size: 20px;
+      }
+    }
+  </style>
+  
+\end{lstlisting}
+
+\subsubsection{Component - MainHead}
+
+\begin{lstlisting}[language=HTML, caption={Component - MainHead}, label=Component - MainHead]
+  ---
+  import { SEO } from 'astro-seo'
+  const { title, seoTitle, seoDesc } = Astro.props
+  ---
+  
+  <head>
+    <SEO title={seoTitle} description={seoDesc} />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="icon" type="image/x-icon" href="../../public/favicon.svg" sizes="any" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto" rel="stylesheet" />
+  </head>
+  
+\end{lstlisting}
+
+\newpage
+
+\subsubsection{Component - Layout}
+
+\begin{lstlisting}[language=HTML, caption={Component - Layout}, label=Component - Layout]
+  ---
+  import MainHead from './MainHead.astro'
+  const { title, seoDesc, seoTitle } = Astro.props
+  import Nav from '../components/Nav.astro'
+  import Footer from '../components/Footer.astro'
+  ---
+  
+  <html lang="en">
+    <MainHead title={title} seoTitle={seoTitle} seoDesc={seoDesc} />
+    <body
+      class="blob-container mx-auto flex max-w-[872px] flex-col gap-0 bg-neutral-900 px-10 py-8 text-sm text-white"
+    >
+      <Nav />
+      <slot />
+      <Footer />
+      <style>
+        @font-face {
+          font-family: 'San Francisco';
+          font-weight: 400;
+          src: url('https://applesocial.s3.amazonaws.com/assets/
+          styles/fonts/sanfrancisco/sanfranciscodisplay .woff');
+        }
+        */ {
+          font-family: 'San Francisco', 'Helvetica Neue', 'Lucida Grande', sans-serif;
+        }
+        body {
+          background-color: #0d0f14;
+        }
+        
+      </style>
+    </body>
+  </html>
+  
+\end{lstlisting}
+
+
+\newpage
+\subsubsection{Component - Footer}
+
+\begin{lstlisting}[language=HTML, caption={Component - Footer}, label=Component - Footer]
+  ---
+
+  ---
+  
+  <footer class="mt-auto py-4 text-center">
+    <small
+      >Copyright &copy; <span id="copyrighspan">Year</span> Acody | All rights reserved</small
+    >
+  </footer>
+  
+  <script>
+    document.querySelector('#copyrighspan').textContent = new Date().getFullYear().toString()
+  </script>
+  
+  <style>
+    a {
+      opacity: 0.7;
+      transition:
+        opacity 0.5s ease-in-out,
+        filter 0.5s ease-in-out;
+    }
+  
+    a:hover {
+      opacity: 1;
+      filter: hue-rotate(90deg);
+    }
+  </style>
+  
+\end{lstlisting}
+
+\newpage
 \subsection{Code du backend}
 
 \subsubsection{Client}
