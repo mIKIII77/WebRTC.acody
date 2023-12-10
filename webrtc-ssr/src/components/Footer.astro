@@ -9,7 +9,12 @@
 </footer>
 
 <script>
-	document.querySelector('#copyrighspan').textContent = new Date().getFullYear().toString()
+
+const copyrightSpan = document.querySelector('#copyrighspan');
+
+if (copyrightSpan) {
+	 copyrightSpan.textContent = new Date().getFullYear().toString();
+}
 </script>
 
 <style>
