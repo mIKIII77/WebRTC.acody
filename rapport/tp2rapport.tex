@@ -14,6 +14,7 @@
 \usepackage{pdflscape}
 \usepackage{hyperref}
 \usepackage{pdfpages}
+\usepackage{lastpage}
 
 \usepackage{geometry}
 \geometry{hmargin=2.5cm,vmargin=1.5cm}
@@ -44,25 +45,25 @@
 }
 
 \lstdefinelanguage{JavaScript}{
-  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
-  keywordstyle=\color{blue}\bfseries,
-  ndkeywords={class, export, boolean, throw, implements, import, this},
-  ndkeywordstyle=\color{darkgray}\bfseries,
-  identifierstyle=\color{black},
-  sensitive=false,
-  comment=[l]{//},
+  morekeywords=[1]{break, continue, delete, else, for, function, if, in,
+    new, return, this, typeof, var, void, while, with},
+  % Literals, primitive types, and reference types.
+  morekeywords=[2]{false, null, true, boolean, number, undefined,
+    Array, Boolean, Date, Math, Number, String, Object},
+  % Built-ins.
+  morekeywords=[3]{eval, parseInt, parseFloat, escape, unescape},
+  sensitive,
   morecomment=[s]{/*}{*/},
-  commentstyle=\color{purple}\ttfamily,
-  stringstyle=\color{red}\ttfamily,
+  morecomment=[l]//,
+  morecomment=[s]{/**}{*/}, % JavaDoc style comments
   morestring=[b]',
   morestring=[b]"
-}
+}[keywords, comments, strings]
 
 \renewcommand{\lstlistingname}{}
 \renewcommand{\thesection}{\arabic{section}}
 
 \usepackage{fancyhdr}
-\usepackage{lastpage} % Ajouter pour le référencement de la dernière page
 
 \fancypagestyle{plain}{
   \fancyhf{} % clear all header and footer fields for the first page
@@ -74,7 +75,7 @@
 \fancyhf{} % clear all header and footer fields
 \fancyhead{} % efface le contenu du haut de page
 \fancyfoot[L]{Rapport SAE5.ROM.03} % Gauche du pied de page
-\fancyfoot[C]{\thepage/\pageref{LastPage}} % Numéro de page / Total de pages au centre du pied de page
+\fancyfoot[C]{\thepage/59} % Numéro de page / Total de pages au centre du pied de page
 \fancyfoot[R]{\href{https://portfolio.louispluviose.fr}{PLUVIOSE} - \href{https://karap.fr}{KARAPETYAN}} % Droite du pied de page
 \renewcommand{\headrulewidth}{0pt} % Pas de ligne en haut de page
 \renewcommand{\footrulewidth}{0pt} % Pas de ligne en bas de page
@@ -160,7 +161,9 @@ Dans un monde de plus en plus connecté, la communication en temps réel via Int
 
 La technologie WebRTC, un standard ouvert et gratuit, permet de réaliser des appels vidéo et audio de haute qualité avec une faible latence, garantissant ainsi une communication fluide et efficace. Notre application SAE5.ROM.03 est conçue pour être intuitive et facilement accessible, offrant une interface utilisateur élégante et des fonctionnalités adaptées à divers contextes, que ce soit pour des réunions, des sessions de travail collaboratif, ou des conversations personnelles.\\
 
-L'accent est mis sur la facilité d'utilisation. Les utilisateurs peuvent créer et rejoindre des salles de conférence virtuelles en quelques clics, tout en bénéficiant d'une connexion fiable. De plus, l'application prend en charge plusieurs participants.
+L'accent est mis sur la facilité d'utilisation. Les utilisateurs peuvent créer et rejoindre des salles de conférence virtuelles en quelques clics, tout en bénéficiant d'une connexion fiable. De plus, l'application prend en charge plusieurs participants.\\
+
+Une démonstration de l'application est disponible à l'adresse suivante : \url{https://webrtc.louispluviose.fr/}
 \newpage
 
 \section{Diagrammes de séquence}
@@ -338,7 +341,7 @@ La page Messagerie est dédiée à la communication textuelle en temps réel, of
 
 \section{Fonctionnement de l'application de réunion}
 
-Le code relatif à l'application est disponnible sur GitHub à l'adresse suivante : et en annexe de ce document.
+Le code relatif à l'application est disponnible sur GitHub à l'adresse suivante \href{https://github.com/mIKIII77/SAE5.ROM.03}: et en annexe de ce document.
 
 \subsection{DOM Elements}
 
@@ -893,20 +896,11 @@ Dans l'ensemble, l'application de SSR avec Astro.js contribue clairement à une 
 
 ATTENTION : au préalable, il faut installer NodeJS et NPM sur la machine !\\
 
-Pour installer l'application en dur, il suffit de cloner le dépôt git suivant : \url{}{}.\\
+Pour installer l'application en dur, il suffit de cloner le dépôt git suivant : \url{https://github.com/mIKIII77/SAE5.ROM.03} avec la commande\\ 
+\verb|git clone https://github.com/mIKIII77/SAE5.ROM.03.git|\\
 
 Ensuite, il faut naviger dans le dossier \verb|SAE5.ROM.03/webssr| et lancer la commande \verb|npm install| pour installer les dépendances.\\
 Enfin, il faut lancer la commande \verb|npm run build| puis \verb|node ./run-server.mjs| pour lancer l'application.\\
-
-\subsection{Installation en Docker}
-
-ATTENTION : au préalable, il faut installer Docker sur la machine !\\
-
-Pour installer l'application en Docker, il suffit de cloner le dépôt git suivant : \url{}{}.\\
-
-Ensuite, il faut naviger dans le dossier \verb|SAE5.ROM.03/docker| et lancer la commande \verb|docker build . -t nom-de-votre-application| pour construire l'image Docker.\\
-
-Enfin, il faut lancer la commande \verb|docker run -p 3000:3000 nom-de-votre-application| pour lancer l'application.\\
 
 \newpage
 
@@ -914,7 +908,7 @@ Enfin, il faut lancer la commande \verb|docker run -p 3000:3000 nom-de-votre-app
 
 \subsection{Bugs connus}
 
-Nous avons pu détecter 2 bugs dans notre application.\\
+Nous avons pu détecter 3 bugs dans notre application.\\
 
 \subsubsection{Premier bug}
 
@@ -929,6 +923,10 @@ Lors de certains appels, il arrive que la connexion se fasse mal et que un des i
 \subsubsection{Deuxième bug}
 
 Au moment de raccrocher l'appel, il se peut la vidéo de l'autre interlocuteur reste affichée. Pour résoudre ce problème, il faut rafraichir la page.\\
+
+\subsubsection{Troisième bug}
+
+Lors de certains appels, il se peut que l'affichage se fasse mal et que les vidéos des interlocuteurs se chevauchent. Pour résoudre ce problème, il faut rafraichir la page.\\
 
 \subsection{Bugs inconnus}
 
@@ -1606,7 +1604,6 @@ async function createPeerConnection(peerId) {
 
   peerConnections[peerId] = peerConnection;
 
-  \usepackage{lastpage}
   if (!isRoomCreator) {
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
@@ -1627,7 +1624,7 @@ async function handleOffer(data) {
     }
 
     const peerConnection = peerConnections[data.peerId];
-    console.log(\texttt{\'{E}tat} de la connexion Peer avant setRemoteDescription: $\backslash$texttt{${peerConnection.signalingState}}$`);
+    console.log(L'Etat de la connexion Peer avant setRemoteDescription: peerConnection.signalingState`);
 
     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
 
