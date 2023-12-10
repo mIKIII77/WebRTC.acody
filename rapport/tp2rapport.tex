@@ -13,7 +13,7 @@
 \usepackage{pgf-umlsd}
 \usepackage{pdflscape}
 \usepackage{hyperref}
-
+\usepackage{pdfpages}
 
 \usepackage{geometry}
 \geometry{hmargin=2.5cm,vmargin=1.5cm}
@@ -701,12 +701,33 @@ Le code source est présent en annexe (voir Annexe X). Voici une explication tec
 \subsection{Analyse de l'UI (Interface Utilisateur)}
 \subsection{Analyse de l'UX (Expérience Utilisateur)}
 \subsection{Recommandations et Améliorations}
-
-
-
-
 \newpage
 
+\section{Performances de l'application}
+
+\subsection{Page Load Time}
+
+Le rapport ci dessous, fourni par CloudFlare nous permet de voir les performances de notre application.\\
+
+\verb|Temps de chargement global| : le temps de chargement de la page de 150 ms est exceptionnel et bien inférieur au temps de chargement moyen sur l'internet, qui dépasse souvent 1 000 ms. Cela indique que le backend et le réseau sont hautement optimisés.\\
+
+\verb|Implications pour l'expérience utilisateur| : Un temps de chargement rapide, tel que celui obtenu, est susceptible de contribuer à une expérience utilisateur positive, en réduisant les taux de rebond et en améliorant potentiellement les taux de conversion.\\
+\verb|Avantages du rendu côté serveur (SSR)| : Le SSR fourni par Astro.js permet au contenu d'être rendu sur le serveur et envoyé au client sous la forme d'une page statique.\\
+\includepdf[scale=0.75,pages=-]{pageloadtime.pdf}
+\subsection{Core Web Vitals}
+
+Le rapport ci dessous, fourni par CloudFlare nous permet de voir une analyse de l'expérience utilisateur de notre application.\\
+
+Le rapport montre d'excellentes mesures de performance pour votre application. Le Largest Contentful Paint (LCP) pour différents percentiles (P50, P75, P90, P99) varie de 197 ms à 258 ms, ce qui est bien en deçà du seuil requis pour une bonne expérience utilisateur. Ces mesures indiquent que votre application charge toujours rapidement l'élément de contenu le plus volumineux pour la grande majorité des utilisateurs.\\
+
+En outre, le délai de première entrée (FID) est bon à 100 \%, ce qui suggère que les utilisateurs peuvent interagir avec votre application presque immédiatement après le chargement du contenu. Cet aspect est crucial pour l'engagement et la fidélisation des utilisateurs.\\
+
+Le décalage cumulatif de la mise en page (CLS) est bon à 92 \%, avec seulement 8 \% d'améliorations à apporter. Cela montre que la plupart des utilisateurs bénéficient d'une mise en page visuelle stable avec un minimum de décalages inattendus, ce qui est essentiel pour une bonne expérience utilisateur.\\
+
+Dans l'ensemble, l'application de SSR avec Astro.js contribue clairement à une expérience utilisateur rapide et fiable à travers diverses mesures de performance.
+
+\includepdf[scale=0.75,pages=-]{corewebvitals.pdf}
+\newpage
 \section{Installation de l'application}
 
 \subsection{Installation en dur}
