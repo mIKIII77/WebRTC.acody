@@ -1,0 +1,31 @@
+---
+import MainHead from './MainHead.astro'
+const { title, seoDesc, seoTitle } = Astro.props
+import Nav from '../components/Nav.astro'
+import Footer from '../components/Footer.astro'
+---
+
+<html lang="en">
+	<MainHead title={title} seoTitle={seoTitle} seoDesc={seoDesc} />
+	<body
+		class="blob-container mx-auto flex max-w-[872px] flex-col gap-0 bg-neutral-900 px-10 py-8 text-sm text-white"
+	>
+		<Nav />
+		<slot />
+		<Footer />
+		<style>
+			@font-face {
+				font-family: 'San Francisco';
+				font-weight: 400;
+				src: url('https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-regular-webfont.woff');
+			}
+			*/ {
+				font-family: 'San Francisco', 'Helvetica Neue', 'Lucida Grande', sans-serif;
+			}
+			body {
+				background-color: #0d0f14;
+			}
+			
+		</style>
+	</body>
+</html>

@@ -1,23 +1,25 @@
-# Étape 1: Image de base Node.js
-FROM node:16
+# Use the official Node.js 16 image as a base
+FROM node:18.18.2
 
-# Étape 2: Définir le répertoire de travail
+# Set the working directory in the Docker image
 WORKDIR /app
 
-# Étape 3: Copier les fichiers package.json et package-lock.json
+# Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
-# Installer les dépendances
-RUN npm install
+# Install dependencies
+RUN npm install &> build.log
 
-# Étape 4: Copier le reste des fichiers de l'application
-COPY . .
+# Copy the rest of your project's files into the Docker image
+COPY src ./src
+COPY app ./app
 
-# Étape 5: Construire l'application
+# Build your Astro project
+RUN npm install -g astro
 RUN npm run build
 
-# Étape 6: Démarrer le serveur avec node
-CMD ["node", "./run-server.mjs"]
+# Expose the port that your app will run on
+EXPOSE 8080
 
-# docker build -t nom-de-votre-application .
-# docker run -p 3000:3000 nom-de-votre-application
+# The default command to run when starting the container
+CMD ["node", "run-server.mjs"]

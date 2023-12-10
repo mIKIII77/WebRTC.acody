@@ -1,4 +1,5 @@
-\documentclass[12pt, a4paper, oneside]{Thesis}
+\documentclass[12pt, a4paper, oneside]{thesis}
+\usepackage{tgheros}
 \usepackage[utf8]{inputenc}
 \usepackage{kpfonts}
 \usepackage[T1]{fontenc}
@@ -74,7 +75,7 @@
 \fancyhead{} % efface le contenu du haut de page
 \fancyfoot[L]{Rapport SAE5.ROM.03} % Gauche du pied de page
 \fancyfoot[C]{\thepage/\pageref{LastPage}} % Numéro de page / Total de pages au centre du pied de page
-\fancyfoot[R]{PLUVIOSE - KARAPETYAN} % Droite du pied de page
+\fancyfoot[R]{\href{https://portfolio.louispluviose.fr}{PLUVIOSE} - \href{https://karap.fr}{KARAPETYAN}} % Droite du pied de page
 \renewcommand{\headrulewidth}{0pt} % Pas de ligne en haut de page
 \renewcommand{\footrulewidth}{0pt} % Pas de ligne en bas de page
 
@@ -106,14 +107,14 @@
 
 \begin{document}
 
-\author{PLUVIOSE Louis - KARAPETYAN Mikhail}
+\author{\href{https://portfolio.louispluviose.fr}{PLUVIOSE Louis} - \href{https://karap.fr}{KARAPETYAN Mikhail}}
 
 \begin{center}
 {\LARGE \textbf{Rapport SAE5.ROM.03}}
 
 \vspace{1cm}
 
-{\Large {PLUVIOSE Louis - KARAPETYAN Mikhail}}
+{\Large {\href{https://portfolio.louispluviose.fr}{PLUVIOSE Louis} - \href{https://karap.fr}{KARAPETYAN Mikhail}}}
 
 \vspace{1cm}
 
@@ -171,8 +172,8 @@ L'accent est mis sur la facilité d'utilisation. Les utilisateurs peuvent créer
   \newinst[3]{s}{Server}
   \newthreadShift{c2}{Client 2}{3cm}
 
-   % Connexion du client 1 et jointure à une salle
-   \begin{sdblock}{Join Room}{Client 1 rejoins une salle de vidéo conférence}
+  % Connexion du client 1 et jointure à une salle
+  \begin{sdblock}{Join Room}{Client 1 rejoins une salle de vidéo conférence}
     \begin{call}{c1}{join(roomId)}{s}{}
     \end{call}
   \end{sdblock}
@@ -723,7 +724,7 @@ ATTENTION : au préalable, il faut installer Docker sur la machine !\\
 
 Pour installer l'application en Docker, il suffit de cloner le dépôt git suivant : \url{}{}.\\
 
-Ensuite, il faut naviger dans le dossier \verb|SAE5.ROM.03/docker| et lancer la commande \verb|docker build -t nom-de-votre-application| pour construire l'image Docker.\\
+Ensuite, il faut naviger dans le dossier \verb|SAE5.ROM.03/docker| et lancer la commande \verb|docker build . -t nom-de-votre-application| pour construire l'image Docker.\\
 
 Enfin, il faut lancer la commande \verb|docker run -p 3000:3000 nom-de-votre-application| pour lancer l'application.\\
 
