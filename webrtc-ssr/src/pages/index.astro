@@ -36,31 +36,29 @@ import Layout from '../layouts/Layout.astro';
 		  padding: 10px;
 		}
 	
-		video {
-		  width: 50%;
-		  height: 40%;
-		  object-fit: cover;
-		}
-	
-		#local-video {
-		  grid-row: 2;
-		  grid-column: 1;
-		}
-	
-		.remote-video-1 {
-		  grid-row: 1;
-		  grid-column: 1;
-		}
-	
-		.remote-video-2 {
-		  grid-row: 1;
-		  grid-column: 2;
-		}
-	
-		.remote-video-3 {
-		  grid-row: 2;
-		  grid-column: 2;
-		}
+    .video-chat-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.local-video-container {
+    flex: 1; /* Adjust as needed */
+    padding: 10px;
+}
+
+.remote-videos-container {
+    flex: 2; /* Adjust as needed */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start; /* Aligns videos to the top */
+    justify-content: start;
+    padding: 10px;
+}
+
+video {
+    width: 100%;
+    height: auto;
+}
 
     .room-selection-container {
       display: none;
@@ -83,16 +81,18 @@ import Layout from '../layouts/Layout.astro';
 				<label>Enter the number of the room you want to connect</label>
 				<input id="room-input" type="text" />
 				<button id="connect-button">CONNECT</button>
-			  </div>
+			</div>
 			
-			  <div id="video-chat-container" class="video-position" style="display: none">
-				  <div id="local-video-container">
-            <video id="local-video" autoplay muted></video>
-          </div>
-        <div id="remote-videos-container">
-          <video id="remote-video-1"></video>
-          <video id="remote-video-2"></video>
-          <video id="remote-video-3"></video>
+			<div id="video-chat-container" class="video-position" style="display: none">
+				<div id="local-video-container" class="local-video-container">
+          <video id="local-video" autoplay muted></video>
+        </div>
+<div id="remote-videos-container" class="w-1/2 h-full grid grid-cols-2 grid-rows-2 gap-4">
+            <!-- Remote videos will be dynamically added here -->
+            <!-- Placeholder divs for layout -->
+            <div class="remote-video-1"></div>
+            <div class="remote-video-2"></div>
+            <div class="remote-video-3"></div>
         </div>
 		</div>
   </div>
