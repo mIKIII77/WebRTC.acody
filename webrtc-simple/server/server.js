@@ -7,8 +7,8 @@ const WebSocketServer = WebSocket.Server;
 
 // Yes, TLS is required for WebRTC
 const serverConfig = {
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem'),
+  key: fs.readFileSync('../key.pem'),
+  cert: fs.readFileSync('../cert.pem'),
 };
 
 function main() {
@@ -25,10 +25,10 @@ function startHttpsServer(serverConfig) {
     // This server only serves two files: The HTML page and the client JS file
     if(request.url === '/') {
       response.writeHead(200, {'Content-Type': 'text/html'});
-      response.end(fs.readFileSync('client/index.html'));
+      response.end(fs.readFileSync('../client/index.html'));
     } else if(request.url === '/webrtc.js') {
       response.writeHead(200, {'Content-Type': 'application/javascript'});
-      response.end(fs.readFileSync('client/webrtc.js'));
+      response.end(fs.readFileSync('../client/webrtc.js'));
     }
   };
 

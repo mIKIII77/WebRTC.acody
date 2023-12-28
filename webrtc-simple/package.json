@@ -7,9 +7,13 @@
     "start": "node server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["webrtc"],
+  "keywords": [
+    "webrtc"
+  ],
   "author": "",
   "dependencies": {
+    "uuid": "^9.0.1",
+    "uuidv7": "^0.6.3",
     "ws": "^8.13.0"
   }
 }

@@ -29,10 +29,7 @@ io.on('connection', (socket) => {
 
   socket.on('chat_message', (data) => {
     messages.push(data);
-<<<<<<< Updated upstream
     console.log('message: ' + data);
-=======
->>>>>>> Stashed changes
     // Diffusion du message à tous les clients connectés
     io.emit('chat_message', data);
   });
