@@ -1,0 +1,15 @@
+{
+  "name": "WebRTC_KARAPETYAN_PLUVIOSE",
+  "version": "1.0.0",
+  "description": "For SAE5.ROM.03 - WebRTC",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["webrtc"],
+  "author": "",
+  "dependencies": {
+    "ws": "^8.13.0"
+  }
+}

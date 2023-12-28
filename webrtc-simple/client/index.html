@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="webrtc.js"></script>
+  <title>WebRTC - Louis PLUVIOSE & Mikhail KARAPETAYN</title>
+</head>
+
+<body>
+  <h1>WebRTC - Louis PLUVIOSE & Mikhail KARAPETAYN</h1>
+
+  <div class="boxx">
+    <div class="videos">
+      <video id="localVideo" autoplay playsinline muted style="width:40%;"></video>
+      <video id="remoteVideo" autoplay playsinline style="width:40%;"></video>
+    </div>
+    <hr>
+    <div class="text">
+      Appuyez sur le bouton "Start WebRTC" pour commencer l'appel WebRTC.
+      Si vous souhaitez tester l'appel WebRTC tout seul, ouvrez cette page dans un nouvel onglet.
+    </div>
+    <hr>
+    <div class="button">
+      <input type="button" id="start" onclick="start(true)" value="Start WebRTC"></input>
+    </div>
+  </div>
+  <div class="foot">
+    Created by <a href="https://www.linkedin.com/in/louis-pluviose-b58ba8220/">Louis PLUVIOSE</a> & <a
+      href="https://www.linkedin.com/in/mikhail-karapetyan-b8243119a/">Mikhail KARAPETAYN</a>
+  </div>
+
+  <script type="text/javascript">
+    pageReady();
+  </script>
+
+  <style>
+    body {
+      margin-left: 20%;
+      margin-right: 20%;
+      margin-top: 10%;
+      font-family: 'Arial', sans-serif;
+    }
+
+    hr {
+      margin-left: 5%;
+      margin-right: 5%;
+    }
+
+    h1 {
+      text-align: center;
+
+    }
+
+    .foot {
+      text-align: center;
+      margin-top: 10%;
+    }
+
+    .boxx {
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .text {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      margin-left: 5%;
+      margin-right: 5%;
+      text-align: center;
+
+    }
+
+    .button {
+      margin-bottom: 10px;
+      margin-top: 3%;
+      text-align: center;
+    }
+
+    #start {
+      padding: 10px;
+      font-size: 16px;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #start:hover {
+      background-color: #2980b9;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    video {
+      width: 40%;
+      border: 5px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .videos {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+    }
+
+    .instructions {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .controls {
+      margin-top: 10px;
+    }
+  </style>
+</body>
+
+</html>

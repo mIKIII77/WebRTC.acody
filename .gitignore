@@ -1,0 +1,16 @@
+# Ignore les fichiers de sauvegarde LaTeX
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fdb_latexmk
+
+# Ignore les fichiers de compilation LaTeX
+*.toc
+*.lol
+*.fls
+*.lof
+*.lot
+*.blg
+*.bbl
+
