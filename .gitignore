@@ -13,3 +13,5 @@
 *.lot
 *.blg
 *.bbl
+
+*/rapport/*.pdf
